@@ -6,3 +6,5 @@ Import the upstream `alkisstam/sidebar` repository at the immutable `v2.2.0` tag
 Retry after correcting the upstream checkout workspace path. Preserve this request file and the workflow during import.
 
 Retry import after replacing the unsafe rsync operation with a safe copy.
+
+Retry import after excluding upstream .git metadata and restoring the destination origin.
