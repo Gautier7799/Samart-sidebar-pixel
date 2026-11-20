@@ -30,13 +30,18 @@ jobs:
         with:
           repository: alkisstam/sidebar
           ref: v2.2.0
-          path: /tmp/sidebar-upstream
+          path: upstream-source
           fetch-depth: 1
 
-      - name: Import upstream source while preserving Git history in this repository
+      - name: Import upstream source while preserving project automation
         shell: bash
         run: |
-          rsync -a --delete --exclude='.git' /tmp/sidebar-upstream/ ./
+          rsync -a --delete \
+            --exclude='.git' \
+            --exclude='IMPORT_REQUEST.md' \
+            --exclude='.github/workflows/import-and-build.yml' \
+            upstream-source/ ./
+          rm -rf upstream-source
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add -A
