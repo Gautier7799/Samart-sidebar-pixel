@@ -34,9 +34,9 @@ export function makeStyles(colors: AppColors) {
       flexDirection: "row",
       alignItems: "center",
       backgroundColor: colors.surfaceContainerHigh,
-      borderRadius: 20,
-      paddingHorizontal: 20,
-      paddingVertical: 18,
+      borderRadius: 26,
+      paddingHorizontal: 22,
+      paddingVertical: 20,
       margin: 16,
       marginBottom: 8,
     },
@@ -44,10 +44,10 @@ export function makeStyles(colors: AppColors) {
     scroll: { flex: 1 },
     scrollContent: { padding: 16, paddingBottom: 32 },
 
-    section: { backgroundColor: colors.surfaceContainer, borderRadius: 16, overflow: "hidden" },
+    section: { backgroundColor: colors.surfaceContainer, borderRadius: 24, overflow: "hidden" },
     sectionTitle: {
-      fontSize: 13, fontWeight: "600", color: colors.primary,
-      marginHorizontal: 20, marginTop: 16, marginBottom: 4, letterSpacing: 0.3,
+      fontSize: 12, fontWeight: "700", color: colors.primary,
+      marginHorizontal: 22, marginTop: 20, marginBottom: 8, letterSpacing: 0.8,
     },
     separator: { height: StyleSheet.hairlineWidth, backgroundColor: colors.separator, marginLeft: 72 },
 
@@ -73,14 +73,14 @@ export function makeStyles(colors: AppColors) {
 
     row: {
       flexDirection: "row", alignItems: "center",
-      paddingHorizontal: 20, paddingVertical: 16,
+      paddingHorizontal: 22, paddingVertical: 18,
     },
     rowLabel: { fontSize: 16, color: colors.text },
     rowSub: { fontSize: 13, color: colors.subtext, marginTop: 2 },
 
     settingRow: {
       flexDirection: "row", alignItems: "center",
-      paddingHorizontal: 20, paddingVertical: 14, gap: 16,
+      paddingHorizontal: 22, paddingVertical: 16, gap: 16,
     },
     settingLabel: { fontSize: 16, color: colors.text, width: 80 },
 
@@ -137,7 +137,7 @@ export function makeStyles(colors: AppColors) {
     // M3 Error Banner
     banner: {
       backgroundColor: colors.errorContainer,
-      borderRadius: 16, padding: 16, gap: 8, margin: 16, marginBottom: 0,
+      borderRadius: 22, padding: 18, gap: 10, margin: 16, marginBottom: 0,
     },
     bannerTitle: { fontSize: 14, fontWeight: "700", color: colors.onErrorContainer },
     bannerBody: { fontSize: 13, color: colors.onErrorContainer, lineHeight: 20 },
@@ -202,17 +202,19 @@ export function makeStyles(colors: AppColors) {
     tabBar: {
       flexDirection: "row",
       backgroundColor: colors.surfaceContainer,
-      paddingBottom: 14,
-      paddingTop: 8,
+      paddingBottom: 16,
+      paddingTop: 10,
+      borderTopWidth: StyleSheet.hairlineWidth,
+      borderTopColor: colors.separator,
     },
     tabItem: { flex: 1, alignItems: "center" },
     navIndicator: {
-      width: 72, height: 52, borderRadius: 26,
+      width: 76, height: 48, borderRadius: 24,
       backgroundColor: 'transparent',
       alignItems: "center", justifyContent: "center",
       flexDirection: "column", gap: 2,
     },
-    navIndicatorActive: { backgroundColor: colors.primaryContainer, borderRadius: 26 },
+    navIndicatorActive: { backgroundColor: colors.primaryContainer, borderRadius: 24 },
     tabLabel: { fontSize: 11, color: colors.subtext, letterSpacing: 0.4 },
     tabLabelActive: { color: colors.onPrimaryContainer, fontWeight: "500" },
   });
