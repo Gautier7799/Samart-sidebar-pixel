@@ -10,3 +10,5 @@ Retry import after replacing the unsafe rsync operation with a safe copy.
 Retry import after excluding upstream .git metadata and restoring the destination origin.
 
 Rebuild after configuring React Native to embed the JavaScript bundle in the standalone debug APK; verify the APK contains assets/index.android.bundle before publishing the artifact.
+
+Rebuild after applying the standalone React Native debug bundle configuration after upstream import, and fail unless assets/index.android.bundle is present inside the APK.
