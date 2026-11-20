@@ -320,6 +320,21 @@ class SidebarOverlayService : Service() {
         if (light) Color.parseColor("#CAC4D0") else Color.parseColor("#49454F")
     )
 
+    private fun panelAccentColor(): Int = panelOutlineColor
+    private fun panelAccentContainer(light: Boolean): Int = systemPaletteColor(
+        if (light) "system_accent1_100" else "system_accent1_800",
+        if (light) Color.parseColor("#EADDFF") else Color.parseColor("#4F378B")
+    )
+    private fun panelSurfaceContainer(light: Boolean): Int = systemPaletteColor(
+        if (light) "system_neutral2_100" else "system_neutral2_800",
+        if (light) Color.parseColor("#F0ECF4") else Color.parseColor("#302D35")
+    )
+    private fun tonalColor(color: Int, alpha: Int): Int = Color.argb(alpha, Color.red(color), Color.green(color), Color.blue(color))
+    private fun labelColorForControls(): Int {
+        val night = (resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK) == Configuration.UI_MODE_NIGHT_YES
+        return if (night) Color.parseColor("#E6E0E9") else Color.parseColor("#29252F")
+    }
+
     private fun makeOutlinedPanelBackground(panelBg: Int, cornerRadiusDp: Int): GradientDrawable =
         GradientDrawable().apply {
             setColor(panelBg)
@@ -520,12 +535,12 @@ class SidebarOverlayService : Service() {
         val effectiveSide = if (prefs.side == "both") lastActiveSide else prefs.side
 
         val screenHeight = resources.displayMetrics.heightPixels
-        // Tools(56)+divider(1)+padding(12)+6 cells×68dp
-        val maxPanelHeight = dp(485)
+        // Material surface header and more generous app rows.
+        val maxPanelHeight = dp(520)
         val recents = if (oPrefs.showRecentApps) cachedRecentApps.take(4) else emptyList()
         val totalAppCount = recents.size + pkgs.size
-        val appH = if (totalAppCount == 0) dp(60) else totalAppCount * dp(68)
-        val panelHeight = (dp(57) + appH).coerceAtMost(maxPanelHeight).coerceAtMost(screenHeight)
+        val appH = if (totalAppCount == 0) dp(68) else totalAppCount * dp(72)
+        val panelHeight = (dp(68) + appH).coerceAtMost(maxPanelHeight).coerceAtMost(screenHeight)
         val handleCenterY = (prefs.position * screenHeight).toInt()
         val panelY = (handleCenterY - panelHeight / 2).coerceIn(0, maxOf(0, screenHeight - panelHeight))
 
@@ -561,32 +576,37 @@ class SidebarOverlayService : Service() {
         val toolsBtn = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
             gravity = Gravity.CENTER
-            layoutParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, dp(64))
+            layoutParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, dp(68))
             isClickable = true
             isFocusable = true
+            background = GradientDrawable().apply {
+                setColor(tonalColor(panelAccentContainer(effectiveLight), 220))
+                cornerRadius = dp(22).toFloat()
+                setStroke(dp(1), tonalColor(panelAccentColor(), 42))
+            }
+            setPadding(dp(4), dp(5), dp(4), dp(4))
         }
         toolsBtn.addView(TextView(this).apply {
             text = ""
-            textSize = 22f
+            textSize = 24f
             gravity = Gravity.CENTER
-            setTextColor(iconColor)
+            setTextColor(if (effectiveLight) panelAccentColor() else Color.WHITE)
             typeface = iconTypeface
         })
         toolsBtn.addView(TextView(this).apply {
             text = "Tools"
-            textSize = 10f
+            textSize = 11f
+            setTypeface(android.graphics.Typeface.DEFAULT, android.graphics.Typeface.MEDIUM)
             gravity = Gravity.CENTER
-            setTextColor(iconColor)
-            layoutParams = LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT
-            ).apply { topMargin = dp(2) }
+            setTextColor(if (effectiveLight) panelAccentColor() else Color.WHITE)
+            layoutParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT).apply { topMargin = dp(1) }
         })
         toolsBtn.setOnClickListener { toggleControlsPanel(prefs, oPrefs, effectiveSide, panelY) }
         root.addView(toolsBtn)
 
 
         root.addView(View(this).apply {
-            setBackgroundColor(Color.argb(90, Color.red(panelDividerColor(effectiveLight)), Color.green(panelDividerColor(effectiveLight)), Color.blue(panelDividerColor(effectiveLight))))
+            setBackgroundColor(tonalColor(panelDividerColor(effectiveLight), 150))
             layoutParams = LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT, 1
             ).apply { marginStart = dp(8); marginEnd = dp(8) }
@@ -595,7 +615,7 @@ class SidebarOverlayService : Service() {
         val scroll = ScrollView(this).apply { isVerticalScrollBarEnabled = false }
         val container = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
-            setPadding(dp(6), dp(6), dp(6), dp(10))
+            setPadding(dp(7), dp(8), dp(7), dp(12))
         }
 
         fun loadCell(pkg: String): View? {
@@ -661,7 +681,7 @@ class SidebarOverlayService : Service() {
         val panelGravity = if (effectiveSide == "left") Gravity.START or Gravity.TOP
                            else Gravity.END or Gravity.TOP
         wm.addView(root, WindowManager.LayoutParams(
-            dp(76), panelHeight,
+            dp(88), panelHeight,
             overlayType(),
             WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or
                     WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL or
@@ -673,7 +693,7 @@ class SidebarOverlayService : Service() {
         handleView?.visibility = View.INVISIBLE
         handleViewAlt?.visibility = View.INVISIBLE
 
-        val slideFrom = if (effectiveSide == "left") -dp(76).toFloat() else dp(76).toFloat()
+        val slideFrom = if (effectiveSide == "left") -dp(88).toFloat() else dp(88).toFloat()
         root.translationX = slideFrom
         root.alpha = 0f
         root.scaleX = 0.92f
@@ -705,8 +725,8 @@ class SidebarOverlayService : Service() {
         val effectiveLight = if (prefs.panelColor.isNotEmpty()) {
             val hsv = FloatArray(3); Color.colorToHSV(panelBg, hsv); hsv[2] > 0.5f
         } else light
-        val tileBg     = if (effectiveLight) Color.argb(130, 115, 105, 130) else Color.argb(130, 55, 52, 62)
-        val tileActive = if (effectiveLight) Color.argb(255, 103, 80, 164)  else Color.argb(255, 79, 55, 139)
+        val tileBg = tonalColor(panelSurfaceContainer(effectiveLight), 255)
+        val tileActive = tonalColor(panelAccentContainer(effectiveLight), 255)
         val labelColor = if (effectiveLight) Color.argb(230, 28, 27, 31)    else Color.argb(230, 230, 225, 229)
 
         val ctrl = LinearLayout(this).apply {
@@ -826,8 +846,8 @@ class SidebarOverlayService : Service() {
         val effectiveLight = if (prefs.panelColor.isNotEmpty()) {
             val hsv = FloatArray(3); Color.colorToHSV(panelBg, hsv); hsv[2] > 0.5f
         } else light
-        val tileBg     = if (effectiveLight) Color.argb(130, 115, 105, 130) else Color.argb(130, 55, 52, 62)
-        val tileActive = if (effectiveLight) Color.argb(255, 103, 80, 164)  else Color.argb(255, 79, 55, 139)
+        val tileBg = tonalColor(panelSurfaceContainer(effectiveLight), 255)
+        val tileActive = tonalColor(panelAccentContainer(effectiveLight), 255)
         val labelColor = if (effectiveLight) Color.argb(230, 28, 27, 31)    else Color.argb(230, 230, 225, 229)
 
         val am = getSystemService(AUDIO_SERVICE) as AudioManager
@@ -1248,18 +1268,18 @@ class SidebarOverlayService : Service() {
         val tile = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
             gravity = Gravity.CENTER
-            layoutParams = LinearLayout.LayoutParams(0, dp(60), 1f).apply {
-                marginStart = dp(3); marginEnd = dp(3)
+            layoutParams = LinearLayout.LayoutParams(0, dp(68), 1f).apply {
+                marginStart = dp(4); marginEnd = dp(4)
             }
             isClickable = true
             isFocusable = true
         }
 
         val iconTv = TextView(this).apply {
-            textSize = 20f
+            textSize = 22f
             gravity = Gravity.CENTER
-            setTextColor(Color.WHITE)
             typeface = iconTypeface
+            layoutParams = LinearLayout.LayoutParams(dp(42), dp(42))
         }
         val subtitleTv = TextView(this).apply {
             textSize = 9f
@@ -1273,12 +1293,16 @@ class SidebarOverlayService : Service() {
         }
 
         fun update() {
+            val active = getActive()
             tile.background = GradientDrawable().apply {
-                setColor(if (getActive()) activeColor else bgColor)
-                cornerRadius = dp(12).toFloat()
+                setColor(if (active) activeColor else bgColor)
+                cornerRadius = dp(20).toFloat()
+                setStroke(dp(1), tonalColor(panelDividerColor(true), 34))
             }
             iconTv.text = getIcon()
+            iconTv.setTextColor(if (active) panelAccentColor() else labelColorForControls())
             subtitleTv.text = getSubtitle()
+            subtitleTv.setTextColor(if (active) panelAccentColor() else labelColorForControls())
         }
         update()
 
@@ -1309,7 +1333,7 @@ class SidebarOverlayService : Service() {
             text = label
             textSize = 10f
             gravity = Gravity.CENTER
-            setTextColor(Color.WHITE)
+            setTextColor(labelColorForControls())
             maxLines = 1
             layoutParams = LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT,
@@ -1633,7 +1657,7 @@ class SidebarOverlayService : Service() {
         }
         cell.addView(ImageView(this).apply {
             setImageDrawable(icon)
-            val size = dp(48)
+            val size = dp(50)
             layoutParams = LinearLayout.LayoutParams(size, size)
             scaleType = ImageView.ScaleType.FIT_CENTER
         })
