@@ -293,7 +293,9 @@ class SidebarOverlayService : Service() {
                 return Color.argb(alpha, Color.red(c), Color.green(c), Color.blue(c))
             } catch (_: IllegalArgumentException) {}
         }
-        return if (light) Color.argb(alpha, 255, 251, 254) else Color.argb(alpha, 28, 27, 31)
+        val fallback = if (light) Color.parseColor("#FFFBFE") else Color.parseColor("#1C1B1F")
+        val color = systemPaletteColor(if (light) "system_neutral1_10" else "system_neutral1_900", fallback)
+        return Color.argb(alpha, Color.red(color), Color.green(color), Color.blue(color))
     }
 
     private fun resolveControlsBg(panelBg: Int, rawColor: String, light: Boolean): Int {
@@ -305,13 +307,25 @@ class SidebarOverlayService : Service() {
         return Color.HSVToColor(255, hsv)
     }
 
-    private val panelOutlineColor = Color.parseColor("#39FF14")
+    private val panelOutlineColor: Int
+        get() = systemPaletteColor("system_accent1_600", Color.parseColor("#6750A4"))
+
+    private fun systemPaletteColor(name: String, fallback: Int): Int = try {
+        val id = resources.getIdentifier(name, "color", "android")
+        if (id != 0) getColor(id) else fallback
+    } catch (_: Exception) { fallback }
+
+    private fun panelDividerColor(light: Boolean): Int = systemPaletteColor(
+        if (light) "system_neutral2_200" else "system_neutral2_700",
+        if (light) Color.parseColor("#CAC4D0") else Color.parseColor("#49454F")
+    )
 
     private fun makeOutlinedPanelBackground(panelBg: Int, cornerRadiusDp: Int): GradientDrawable =
         GradientDrawable().apply {
             setColor(panelBg)
             cornerRadius = dp(cornerRadiusDp).toFloat()
-            if (overlayPrefs().panelOutline) setStroke(dp(2), panelOutlineColor)
+            if (overlayPrefs().panelOutline) setStroke(dp(1), Color.argb(150,
+                Color.red(panelOutlineColor), Color.green(panelOutlineColor), Color.blue(panelOutlineColor)))
         }
 
     private fun overlayPrefs(): OverlayPrefs {
@@ -507,7 +521,7 @@ class SidebarOverlayService : Service() {
 
         val screenHeight = resources.displayMetrics.heightPixels
         // Tools(56)+divider(1)+padding(12)+6 cells×68dp
-        val maxPanelHeight = dp(477)
+        val maxPanelHeight = dp(485)
         val recents = if (oPrefs.showRecentApps) cachedRecentApps.take(4) else emptyList()
         val totalAppCount = recents.size + pkgs.size
         val appH = if (totalAppCount == 0) dp(60) else totalAppCount * dp(68)
@@ -538,7 +552,7 @@ class SidebarOverlayService : Service() {
 
         val root = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
-            background = makeOutlinedPanelBackground(panelBg, 32)
+            background = makeOutlinedPanelBackground(panelBg, 28)
             elevation = dp(8).toFloat()
             clipToOutline = true
             outlineProvider = ViewOutlineProvider.BACKGROUND
@@ -547,20 +561,20 @@ class SidebarOverlayService : Service() {
         val toolsBtn = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
             gravity = Gravity.CENTER
-            layoutParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, dp(56))
+            layoutParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, dp(64))
             isClickable = true
             isFocusable = true
         }
         toolsBtn.addView(TextView(this).apply {
             text = ""
-            textSize = 20f
+            textSize = 22f
             gravity = Gravity.CENTER
             setTextColor(iconColor)
             typeface = iconTypeface
         })
         toolsBtn.addView(TextView(this).apply {
             text = "Tools"
-            textSize = 9f
+            textSize = 10f
             gravity = Gravity.CENTER
             setTextColor(iconColor)
             layoutParams = LinearLayout.LayoutParams(
@@ -572,7 +586,7 @@ class SidebarOverlayService : Service() {
 
 
         root.addView(View(this).apply {
-            setBackgroundColor(Color.argb(40, 128, 128, 128))
+            setBackgroundColor(Color.argb(90, Color.red(panelDividerColor(effectiveLight)), Color.green(panelDividerColor(effectiveLight)), Color.blue(panelDividerColor(effectiveLight))))
             layoutParams = LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT, 1
             ).apply { marginStart = dp(8); marginEnd = dp(8) }
@@ -581,7 +595,7 @@ class SidebarOverlayService : Service() {
         val scroll = ScrollView(this).apply { isVerticalScrollBarEnabled = false }
         val container = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
-            setPadding(dp(4), dp(4), dp(4), dp(8))
+            setPadding(dp(6), dp(6), dp(6), dp(10))
         }
 
         fun loadCell(pkg: String): View? {
@@ -647,7 +661,7 @@ class SidebarOverlayService : Service() {
         val panelGravity = if (effectiveSide == "left") Gravity.START or Gravity.TOP
                            else Gravity.END or Gravity.TOP
         wm.addView(root, WindowManager.LayoutParams(
-            dp(64), panelHeight,
+            dp(76), panelHeight,
             overlayType(),
             WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or
                     WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL or
@@ -659,7 +673,7 @@ class SidebarOverlayService : Service() {
         handleView?.visibility = View.INVISIBLE
         handleViewAlt?.visibility = View.INVISIBLE
 
-        val slideFrom = if (effectiveSide == "left") -dp(64).toFloat() else dp(64).toFloat()
+        val slideFrom = if (effectiveSide == "left") -dp(76).toFloat() else dp(76).toFloat()
         root.translationX = slideFrom
         root.alpha = 0f
         root.scaleX = 0.92f
@@ -1593,7 +1607,7 @@ class SidebarOverlayService : Service() {
         val cell = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
             gravity = Gravity.CENTER_HORIZONTAL
-            setPadding(dp(4), dp(10), dp(4), dp(10))
+            setPadding(dp(4), dp(8), dp(4), dp(8))
             isClickable = true
             isFocusable = true
             layoutParams = LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f)
@@ -1601,7 +1615,7 @@ class SidebarOverlayService : Service() {
                 background = GradientDrawable().apply {
                     setColor(Color.TRANSPARENT)
                     cornerRadius = dp(12).toFloat()
-                    setStroke(dp(2), panelOutlineColor)
+                    setStroke(dp(1), Color.argb(150, Color.red(panelOutlineColor), Color.green(panelOutlineColor), Color.blue(panelOutlineColor)))
                 }
             }
             setOnClickListener { onClick() }
