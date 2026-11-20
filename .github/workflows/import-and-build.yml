@@ -41,6 +41,21 @@ jobs:
           tar -C upstream-source --exclude='./.git' -cf - . | tar -C . -xf -
           rm -rf upstream-source
 
+          # Upstream marks the debug variant as Metro-dependent by default.
+          # Pixel Sidebar distributes a standalone APK, so embed the JS bundle.
+          python3 - <<'PY'
+          from pathlib import Path
+          p = Path("android/app/build.gradle")
+          s = p.read_text()
+          marker = '    // debuggableVariants = ["liteDebug", "prodDebug"]'
+          if marker not in s:
+              raise SystemExit("Expected React Native debuggableVariants marker not found")
+          s = s.replace(marker, '    debuggableVariants = []', 1)
+          p.write_text(s)
+          PY
+
+          grep -n 'debuggableVariants = \[\]' android/app/build.gradle
+
           # Restore the destination repository explicitly before committing.
           git remote set-url origin "https://github.com/Gautier7799/Samart-sidebar-pixel.git"
           test "$(git remote get-url origin)" = "https://github.com/Gautier7799/Samart-sidebar-pixel.git"
@@ -72,6 +87,23 @@ jobs:
         run: |
           chmod +x gradlew
           ./gradlew assembleDebug --stacktrace
+
+      - name: Verify standalone JavaScript bundle in APK
+        shell: bash
+        run: |
+          APK="android/app/build/outputs/apk/debug/app-debug.apk"
+          test -f "$APK"
+          if ! unzip -l "$APK" | grep -E 'assets/index\.android\.bundle      - name: Upload debug APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: pixel-sidebar-v2.2.0-baseline-debug
+          path: android/app/build/outputs/apk/debug/*.apk
+          if-no-files-found: error
+; then
+            echo "ERROR: assets/index.android.bundle is missing from the APK"
+            exit 1
+          fi
+          echo "Verified: assets/index.android.bundle is packaged in $APK"
 
       - name: Upload debug APK
         uses: actions/upload-artifact@v4
