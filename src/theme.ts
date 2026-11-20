@@ -1,20 +1,21 @@
 import { StyleSheet } from "react-native";
+import type { DynamicPalette } from "../modules/sidebar";
 
-export function makeColors(scheme: 'light' | 'dark') {
+export function makeColors(scheme: 'light' | 'dark', palette: DynamicPalette = {}) {
   const dark = scheme === "dark";
   return {
-    bg: dark ? "#141218" : "#FFFBFE",
-    surfaceContainer: dark ? "#211F26" : "#F3EFF7",
-    surfaceContainerHigh: dark ? "#2B2930" : "#EDE8F2",
-    card: dark ? "#211F26" : "#F3EFF7",
-    primary: dark ? "#D0BCFF" : "#6750A4",
-    onPrimary: dark ? "#381E72" : "#FFFFFF",
-    primaryContainer: dark ? "#4F378B" : "#EADDFF",
-    onPrimaryContainer: dark ? "#EADDFF" : "#21005D",
+    bg: dark ? (palette.darkBackground ?? "#141218") : (palette.lightBackground ?? "#FFFBFE"),
+    surfaceContainer: dark ? (palette.darkSurface ?? "#211F26") : (palette.lightSurface ?? "#F3EFF7"),
+    surfaceContainerHigh: dark ? (palette.darkSurfaceHigh ?? "#2B2930") : (palette.lightSurfaceHigh ?? "#EDE8F2"),
+    card: dark ? (palette.darkSurface ?? "#211F26") : (palette.lightSurface ?? "#F3EFF7"),
+    primary: dark ? (palette.darkPrimary ?? "#D0BCFF") : (palette.lightPrimary ?? "#6750A4"),
+    onPrimary: dark ? (palette.darkOnPrimary ?? "#381E72") : (palette.lightOnPrimary ?? "#FFFFFF"),
+    primaryContainer: dark ? (palette.darkPrimaryContainer ?? "#4F378B") : (palette.lightPrimaryContainer ?? "#EADDFF"),
+    onPrimaryContainer: dark ? (palette.darkOnPrimaryContainer ?? "#EADDFF") : (palette.lightOnPrimaryContainer ?? "#21005D"),
     secondaryContainer: dark ? "#4A4458" : "#E8DEF8",
     onSecondaryContainer: dark ? "#E8DEF8" : "#1D192B",
-    text: dark ? "#E6E1E5" : "#1C1B1F",
-    subtext: dark ? "#CAC4D0" : "#49454F",
+    text: dark ? (palette.darkText ?? "#E6E1E5") : (palette.lightText ?? "#1C1B1F"),
+    subtext: dark ? (palette.darkSubtext ?? "#CAC4D0") : (palette.lightSubtext ?? "#49454F"),
     outline: dark ? "#938F99" : "#79747E",
     separator: dark ? "#49454F" : "#CAC4D0",
     tint: dark ? "#D0BCFF" : "#6750A4",
