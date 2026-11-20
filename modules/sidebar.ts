@@ -57,7 +57,19 @@ export interface OverlaySettings {
   freeformOnTap: boolean;
 }
 
+export interface DynamicPalette {
+  lightPrimary?: string; lightOnPrimary?: string; lightPrimaryContainer?: string;
+  lightOnPrimaryContainer?: string; lightBackground?: string; lightSurface?: string;
+  lightSurfaceHigh?: string; lightText?: string; lightSubtext?: string;
+  darkPrimary?: string; darkOnPrimary?: string; darkPrimaryContainer?: string;
+  darkOnPrimaryContainer?: string; darkBackground?: string; darkSurface?: string;
+  darkSurfaceHigh?: string; darkText?: string; darkSubtext?: string;
+}
+
 export default {
+  getDynamicColors(): Promise<DynamicPalette> {
+    return SidebarModule.getDynamicColors();
+  },
   getInstalledApps(): Promise<InstalledApp[]> {
     return SidebarModule.getInstalledApps();
   },
