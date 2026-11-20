@@ -1,6 +1,6 @@
 import { Stack } from "expo-router";
 import { useEffect, useMemo, useState } from "react";
-import { useColorScheme } from "react-native";
+import { AppState, useColorScheme } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import * as SplashScreen from "expo-splash-screen";
 import { ThemeChoice, ThemeContext } from "../src/ThemeContext";
@@ -16,15 +16,29 @@ export default function RootLayout() {
 
   useEffect(() => {
     let mounted = true;
-    Sidebar.getDynamicColors()
-      .then(palette => { if (mounted) setDynamicPalette(palette ?? {}); })
-      .catch(() => { if (mounted) setDynamicPalette({}); });
-    return () => { mounted = false; };
+    const refreshDynamicPalette = () => {
+      Sidebar.getDynamicColors()
+        .then(palette => {
+          if (mounted) setDynamicPalette(palette ?? {});
+        })
+        .catch(() => {
+          // Keep the last valid palette if the native lookup temporarily fails.
+        });
+    };
+
+    refreshDynamicPalette();
+    const subscription = AppState.addEventListener("change", state => {
+      if (state === "active") refreshDynamicPalette();
+    });
+
+    return () => {
+      mounted = false;
+      subscription.remove();
+    };
   }, []);
 
   useEffect(() => { SplashScreen.hideAsync(); }, []);
   const appTheme = themeChoice === 'system' ? (systemScheme ?? 'dark') : themeChoice;
-  const dark = appTheme === "dark";
   const colors = useMemo(() => makeColors(appTheme, dynamicPalette), [appTheme, dynamicPalette]);
   return (
     <ThemeContext.Provider value={{ appTheme, themeChoice, setThemeChoice, dynamicPalette }}>
