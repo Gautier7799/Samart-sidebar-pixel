@@ -365,7 +365,7 @@ export default function Index() {
 
   return (
     <View style={s.root}>
-      <Stack.Screen options={{ title: "Sidebar" }} />
+      <Stack.Screen options={{ title: "Pixel Sidebar" }} />
 
       {permissionGranted === false && (
         <View style={s.banner}>
