@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - design/material-you-pixel
+      - feature/material-you-floating-sidebar
     paths:
       - "app/**"
       - "src/**"
@@ -31,7 +32,7 @@ jobs:
       - name: Checkout current design branch (no upstream overwrite)
         uses: actions/checkout@v4
         with:
-          ref: design/material-you-pixel
+          ref: ${{ github.ref }}
           fetch-depth: 1
 
       - name: Set up Java
