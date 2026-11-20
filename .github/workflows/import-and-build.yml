@@ -28,7 +28,7 @@ jobs:
       - name: Checkout upstream Sidebar v2.2.0
         uses: actions/checkout@v4
         with:
-          repository: alkkisstam/sidebar
+          repository: alkisstam/sidebar
           ref: v2.2.0
           path: /tmp/sidebar-upstream
           fetch-depth: 1
