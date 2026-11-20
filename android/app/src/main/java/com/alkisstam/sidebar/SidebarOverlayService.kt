@@ -596,7 +596,7 @@ class SidebarOverlayService : Service() {
         toolsBtn.addView(TextView(this).apply {
             text = "Tools"
             textSize = 11f
-            setTypeface(android.graphics.Typeface.DEFAULT, android.graphics.Typeface.MEDIUM)
+            setTypeface(android.graphics.Typeface.create("sans-serif-medium", android.graphics.Typeface.NORMAL))
             gravity = Gravity.CENTER
             setTextColor(if (effectiveLight) panelAccentColor() else Color.WHITE)
             layoutParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT).apply { topMargin = dp(1) }
