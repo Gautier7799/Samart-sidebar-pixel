@@ -36,11 +36,9 @@ jobs:
       - name: Import upstream source while preserving project automation
         shell: bash
         run: |
-          rsync -a --delete \
-            --exclude='.git' \
-            --exclude='IMPORT_REQUEST.md' \
-            --exclude='.github/workflows/import-and-build.yml' \
-            upstream-source/ ./
+          # Copy from a nested checkout without rsync --delete: deleting the
+          # destination tree would also delete the nested source during transfer.
+          cp -a upstream-source/. ./
           rm -rf upstream-source
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
