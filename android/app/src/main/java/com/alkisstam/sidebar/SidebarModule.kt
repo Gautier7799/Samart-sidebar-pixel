@@ -28,6 +28,41 @@ class SidebarModule(private val reactContext: ReactApplicationContext) :
     private val executor = Executors.newSingleThreadExecutor()
 
     override fun getName() = "SidebarModule"
+    @ReactMethod
+    fun getDynamicColors(promise: Promise) {
+        try {
+            val result = WritableNativeMap()
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                fun color(name: String, fallback: Int): Int {
+                    val id = reactContext.resources.getIdentifier(name, "color", "android")
+                    return if (id != 0) reactContext.getColor(id) else fallback
+                }
+                fun hex(value: Int) = String.format("#%06X", 0xFFFFFF and value)
+                result.putString("lightPrimary", hex(color("system_accent1_600", 0xFF6750A4.toInt())))
+                result.putString("lightOnPrimary", hex(color("system_accent1_0", 0xFFFFFFFF.toInt())))
+                result.putString("lightPrimaryContainer", hex(color("system_accent1_100", 0xFFEADDFF.toInt())))
+                result.putString("lightOnPrimaryContainer", hex(color("system_accent1_900", 0xFF21005D.toInt())))
+                result.putString("lightBackground", hex(color("system_neutral1_10", 0xFFFFFBFE.toInt())))
+                result.putString("lightSurface", hex(color("system_neutral1_50", 0xFFF3EFF7.toInt())))
+                result.putString("lightSurfaceHigh", hex(color("system_neutral1_100", 0xFFEDE8F2.toInt())))
+                result.putString("lightText", hex(color("system_neutral1_900", 0xFF1C1B1F.toInt())))
+                result.putString("lightSubtext", hex(color("system_neutral2_700", 0xFF49454F.toInt())))
+                result.putString("darkPrimary", hex(color("system_accent1_200", 0xFFD0BCFF.toInt())))
+                result.putString("darkOnPrimary", hex(color("system_accent1_800", 0xFF381E72.toInt())))
+                result.putString("darkPrimaryContainer", hex(color("system_accent1_800", 0xFF4F378B.toInt())))
+                result.putString("darkOnPrimaryContainer", hex(color("system_accent1_100", 0xFFEADDFF.toInt())))
+                result.putString("darkBackground", hex(color("system_neutral1_900", 0xFF141218.toInt())))
+                result.putString("darkSurface", hex(color("system_neutral1_800", 0xFF211F26.toInt())))
+                result.putString("darkSurfaceHigh", hex(color("system_neutral1_700", 0xFF2B2930.toInt())))
+                result.putString("darkText", hex(color("system_neutral1_100", 0xFFE6E1E5.toInt())))
+                result.putString("darkSubtext", hex(color("system_neutral2_200", 0xFFCAC4D0.toInt())))
+            }
+            promise.resolve(result)
+        } catch (e: Exception) {
+            promise.reject("ERR_DYNAMIC_COLORS", e.message, e)
+        }
+    }
+
 
     @ReactMethod
     fun getInstalledApps(promise: Promise) {
