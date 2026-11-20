@@ -1,0 +1,74 @@
+name: Import Sidebar v2.2.0 and build Pixel Sidebar
+
+on:
+  push:
+    branches:
+      - design/material-you-pixel
+    paths:
+      - IMPORT_REQUEST.md
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: pixel-sidebar-import
+  cancel-in-progress: false
+
+jobs:
+  import-and-build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Pixel Sidebar repository
+        uses: actions/checkout@v4
+        with:
+          ref: design/material-you-pixel
+          fetch-depth: 0
+
+      - name: Checkout upstream Sidebar v2.2.0
+        uses: actions/checkout@v4
+        with:
+          repository: alkkisstam/sidebar
+          ref: v2.2.0
+          path: /tmp/sidebar-upstream
+          fetch-depth: 1
+
+      - name: Import upstream source while preserving Git history in this repository
+        shell: bash
+        run: |
+          rsync -a --delete --exclude='.git' /tmp/sidebar-upstream/ ./
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          if ! git diff --cached --quiet; then
+            git commit -m "Import upstream Sidebar v2.2.0 baseline"
+            git push origin HEAD:design/material-you-pixel
+          fi
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+
+      - name: Install JavaScript dependencies
+        run: npm ci
+
+      - name: Build Android debug APK
+        working-directory: android
+        run: |
+          chmod +x gradlew
+          ./gradlew assembleDebug --stacktrace
+
+      - name: Upload debug APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: pixel-sidebar-v2.2.0-baseline-debug
+          path: android/app/build/outputs/apk/debug/*.apk
+          if-no-files-found: error
