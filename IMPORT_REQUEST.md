@@ -12,3 +12,5 @@ Retry import after excluding upstream .git metadata and restoring the destinatio
 Rebuild after configuring React Native to embed the JavaScript bundle in the standalone debug APK; verify the APK contains assets/index.android.bundle before publishing the artifact.
 
 Rebuild after applying the standalone React Native debug bundle configuration after upstream import, and fail unless assets/index.android.bundle is present inside the APK.
+
+Run the repaired workflow and verify that the standalone APK contains assets/index.android.bundle.
