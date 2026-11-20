@@ -1,72 +1,56 @@
-name: Import Sidebar v2.2.0 and build Pixel Sidebar
+name: Build Pixel Sidebar APK
 
 on:
   push:
     branches:
       - design/material-you-pixel
     paths:
-      - IMPORT_REQUEST.md
+      - "app/**"
+      - "src/**"
+      - "modules/**"
+      - "android/**"
+      - "assets/**"
+      - "package.json"
+      - "package-lock.json"
+      - "app.json"
+      - "tsconfig.json"
+      - ".github/workflows/**"
   workflow_dispatch:
 
 permissions:
-  contents: write
+  contents: read
 
 concurrency:
-  group: pixel-sidebar-import
+  group: pixel-sidebar-build
   cancel-in-progress: false
 
 jobs:
-  import-and-build:
+  build:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout Pixel Sidebar repository
+      - name: Checkout current design branch (no upstream overwrite)
         uses: actions/checkout@v4
         with:
           ref: design/material-you-pixel
-          fetch-depth: 0
-
-      - name: Checkout upstream Sidebar v2.2.0
-        uses: actions/checkout@v4
-        with:
-          repository: alkisstam/sidebar
-          ref: v2.2.0
-          path: upstream-source
           fetch-depth: 1
-
-      - name: Import upstream source while preserving project automation
-        shell: bash
-        run: |
-          tar -C upstream-source --exclude='./.git' -cf - . | tar -C . -xf -
-          rm -rf upstream-source
-
-          # Force React Native to embed the JS bundle in the standalone debug APK.
-          sed -i '/^[[:space:]]*\/\/ debuggableVariants =/c\    debuggableVariants = []' android/app/build.gradle
-          grep -F 'debuggableVariants = []' android/app/build.gradle
-
-          git remote set-url origin "https://github.com/Gautier7799/Samart-sidebar-pixel.git"
-          test "$(git remote get-url origin)" = "https://github.com/Gautier7799/Samart-sidebar-pixel.git"
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add -A
-          if ! git diff --cached --quiet; then
-            git commit -m "Import Sidebar v2.2.0 with standalone bundle configuration"
-            git push origin HEAD:design/material-you-pixel
-          fi
 
       - name: Set up Java
         uses: actions/setup-java@v4
         with:
           distribution: temurin
-          java-version: '17'
+          java-version: "17"
 
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: "20"
           cache: npm
 
       - name: Install JavaScript dependencies
         run: npm ci
+
+      - name: TypeScript validation
+        run: npx tsc --noEmit
 
       - name: Build standalone Android debug APK
         working-directory: android
@@ -79,12 +63,12 @@ jobs:
         run: |
           APK="android/app/build/outputs/apk/debug/app-debug.apk"
           test -f "$APK"
-          unzip -l "$APK" | grep -F 'assets/index.android.bundle'
+          unzip -l "$APK" | grep -F "assets/index.android.bundle"
           echo "Verified: JavaScript bundle is embedded in the APK."
 
       - name: Upload standalone debug APK
         uses: actions/upload-artifact@v4
         with:
-          name: pixel-sidebar-v2.2.0-standalone-debug
+          name: pixel-sidebar-material-you-debug
           path: android/app/build/outputs/apk/debug/*.apk
           if-no-files-found: error
