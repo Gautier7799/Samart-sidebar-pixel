@@ -93,7 +93,7 @@ type TileKey = typeof CONTROL_TILES[number]['key'];
 type AllKey = typeof ALL_CONTROLS[number]['key'];
 
 export default function Index() {
-  const { appTheme, themeChoice, setThemeChoice } = useAppTheme();
+  const { appTheme, themeChoice, setThemeChoice, dynamicPalette } = useAppTheme();
   const [activeTab, setActiveTab] = useState<Tab>("handle");
   const activeTabRef = useRef<Tab>("handle");
 
@@ -305,7 +305,7 @@ export default function Index() {
 
   const favSet = useMemo(() => new Set(listData.map(i => i.key)), [listData]);
 
-  const colors = useMemo(() => makeColors(appTheme), [appTheme]);
+  const colors = useMemo(() => makeColors(appTheme, dynamicPalette), [appTheme, dynamicPalette]);
 
   const s = useMemo(() => makeStyles(colors), [colors]);
 
