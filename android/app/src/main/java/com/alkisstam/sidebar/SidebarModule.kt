@@ -190,6 +190,7 @@ class SidebarModule(private val reactContext: ReactApplicationContext) :
         if (settings.hasKey("position")) prefs.putFloat(Prefs.PILL_POSITION, settings.getDouble("position").toFloat())
         if (settings.hasKey("side")) prefs.putString(Prefs.PILL_SIDE, settings.getString("side"))
         if (settings.hasKey("opacity")) prefs.putFloat(Prefs.PILL_OPACITY, settings.getDouble("opacity").toFloat())
+        if (settings.hasKey("panelOpacity")) prefs.putFloat(Prefs.PANEL_OPACITY, settings.getDouble("panelOpacity").toFloat())
         if (settings.hasKey("theme")) prefs.putString(Prefs.PILL_THEME, settings.getString("theme"))
         if (settings.hasKey("themeChoice")) prefs.putString(Prefs.THEME_CHOICE, settings.getString("themeChoice"))
         if (settings.hasKey("panelColor")) prefs.putString(Prefs.PANEL_COLOR, settings.getString("panelColor") ?: "")
@@ -216,6 +217,7 @@ class SidebarModule(private val reactContext: ReactApplicationContext) :
         map.putDouble("position", prefs.getFloat(Prefs.PILL_POSITION, 0.5f).toDouble())
         map.putString("side", prefs.getString(Prefs.PILL_SIDE, "right") ?: "right")
         map.putDouble("opacity", prefs.getFloat(Prefs.PILL_OPACITY, 1.0f).toDouble())
+        map.putDouble("panelOpacity", prefs.getFloat(Prefs.PANEL_OPACITY, 0.94f).toDouble())
         map.putString("theme", prefs.getString(Prefs.PILL_THEME, "dark") ?: "dark")
         val savedThemeChoice = prefs.getString(Prefs.THEME_CHOICE, null)
             ?: prefs.getString(Prefs.PILL_THEME, null) ?: "system"
