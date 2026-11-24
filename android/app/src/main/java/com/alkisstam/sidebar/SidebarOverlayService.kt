@@ -541,7 +541,7 @@ class SidebarOverlayService : Service() {
         val totalAppCount = recents.size + pkgs.size
         val sectionHeaders = (if (recents.isNotEmpty()) dp(22) else 0) +
             (if (recents.isNotEmpty() && pkgs.isNotEmpty()) dp(22) else 0)
-        val appH = if (totalAppCount == 0) dp(68) else totalAppCount * dp(72) + sectionHeaders
+        val appH = dp(24) + if (totalAppCount == 0) dp(68) else totalAppCount * dp(72) + sectionHeaders
         val panelHeight = (dp(68) + appH).coerceAtMost(maxPanelHeight).coerceAtMost(screenHeight)
         val handleCenterY = (prefs.position * screenHeight).toInt()
         val panelY = (handleCenterY - panelHeight / 2).coerceIn(0, maxOf(0, screenHeight - panelHeight))
@@ -578,25 +578,25 @@ class SidebarOverlayService : Service() {
         val toolsBtn = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
             gravity = Gravity.CENTER
-            layoutParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, dp(68))
+            layoutParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, dp(76)).apply { marginStart = dp(4); marginEnd = dp(4); topMargin = dp(4); bottomMargin = dp(4) }
             isClickable = true
             isFocusable = true
             background = GradientDrawable().apply {
                 setColor(tonalColor(panelAccentContainer(effectiveLight), 220))
-                cornerRadius = dp(22).toFloat()
-                setStroke(dp(1), tonalColor(panelAccentColor(), 42))
+                cornerRadius = dp(26).toFloat()
+                setStroke(dp(1), tonalColor(panelAccentColor(), 58))
             }
             setPadding(dp(4), dp(5), dp(4), dp(4))
         }
         toolsBtn.addView(TextView(this).apply {
             text = ""
-            textSize = 24f
+            textSize = 26f
             gravity = Gravity.CENTER
             setTextColor(if (effectiveLight) panelAccentColor() else Color.WHITE)
             typeface = iconTypeface
         })
         toolsBtn.addView(TextView(this).apply {
-            text = "Tools"
+            text = "Controls"
             textSize = 11f
             setTypeface(android.graphics.Typeface.create("sans-serif-medium", android.graphics.Typeface.NORMAL))
             gravity = Gravity.CENTER
@@ -619,6 +619,17 @@ class SidebarOverlayService : Service() {
             orientation = LinearLayout.VERTICAL
             setPadding(dp(7), dp(8), dp(7), dp(12))
         }
+
+        container.addView(TextView(this).apply {
+            text = "YOUR APPS"
+            textSize = 9f
+            letterSpacing = 0.12f
+            setTypeface(android.graphics.Typeface.create("sans-serif-medium", android.graphics.Typeface.NORMAL))
+            setTextColor(emptyColor)
+            gravity = Gravity.CENTER_VERTICAL
+            setPadding(dp(7), 0, dp(7), dp(6))
+            layoutParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, dp(24))
+        })
 
         fun loadCell(pkg: String): View? {
             val cached = appIconCache[pkg]
@@ -706,7 +717,7 @@ class SidebarOverlayService : Service() {
         val panelGravity = if (effectiveSide == "left") Gravity.START or Gravity.TOP
                            else Gravity.END or Gravity.TOP
         wm.addView(root, WindowManager.LayoutParams(
-            dp(88), panelHeight,
+            dp(104), panelHeight,
             overlayType(),
             WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or
                     WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL or
@@ -718,7 +729,7 @@ class SidebarOverlayService : Service() {
         handleView?.visibility = View.INVISIBLE
         handleViewAlt?.visibility = View.INVISIBLE
 
-        val slideFrom = if (effectiveSide == "left") -dp(88).toFloat() else dp(88).toFloat()
+        val slideFrom = if (effectiveSide == "left") -dp(104).toFloat() else dp(104).toFloat()
         root.translationX = slideFrom
         root.alpha = 0f
         root.scaleX = 0.92f
