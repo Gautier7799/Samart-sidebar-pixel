@@ -2164,21 +2164,50 @@ class SidebarOverlayService : Service() {
         }
     }
 
+    /**
+     * Build lightweight, on-device app suggestions from the last seven days of UsageStats.
+     * Recent activity has the strongest weight; foreground time breaks ties so frequently
+     * used apps can surface without allowing an old, high-usage app to dominate indefinitely.
+     * No usage data leaves the device.
+     */
     private fun getRecentApps(count: Int): List<String> {
-        val appOps = getSystemService(Context.APP_OPS_SERVICE) as AppOpsManager
-        val mode = appOps.checkOpNoThrow(
-            AppOpsManager.OPSTR_GET_USAGE_STATS, android.os.Process.myUid(), packageName)
-        if (mode != AppOpsManager.MODE_ALLOWED) return emptyList()
-        val usm = getSystemService(Context.USAGE_STATS_SERVICE) as UsageStatsManager
-        val end = System.currentTimeMillis()
-        val start = end - 7 * 24 * 60 * 60 * 1000L
-        return usm.queryUsageStats(UsageStatsManager.INTERVAL_DAILY, start, end)
-            .filter { it.packageName != packageName && it.lastTimeUsed > 0 }
-            .sortedByDescending { it.lastTimeUsed }
-            .map { it.packageName }
-            .filter { pkg -> appIconCache.containsKey(pkg) }
-            .distinct()
-            .take(count)
+        return try {
+            val appOps = getSystemService(Context.APP_OPS_SERVICE) as AppOpsManager
+            val mode = appOps.checkOpNoThrow(
+                AppOpsManager.OPSTR_GET_USAGE_STATS, android.os.Process.myUid(), packageName)
+            if (mode != AppOpsManager.MODE_ALLOWED) return emptyList()
+
+            val end = System.currentTimeMillis()
+            val sevenDays = 7L * 24 * 60 * 60 * 1000
+            val start = end - sevenDays
+            val favorites = loadFavorites().toSet()
+            val usage = (getSystemService(Context.USAGE_STATS_SERVICE) as UsageStatsManager)
+                .queryUsageStats(UsageStatsManager.INTERVAL_DAILY, start, end)
+                .asSequence()
+                .filter { it.packageName != packageName && it.lastTimeUsed > 0L }
+                .filter { it.packageName !in favorites && appIconCache.containsKey(it.packageName) }
+                .groupBy { it.packageName }
+                .mapValues { (_, entries) ->
+                    val lastUsed = entries.maxOfOrNull { it.lastTimeUsed } ?: 0L
+                    val foreground = entries.sumOf { it.totalTimeInForeground.coerceAtLeast(0L) }
+                    Pair(lastUsed, foreground)
+                }
+
+            if (usage.isEmpty()) return emptyList()
+            val maxForeground = usage.values.maxOfOrNull { it.second }?.coerceAtLeast(1L) ?: 1L
+            usage.entries
+                .sortedByDescending { (_, stats) ->
+                    val age = (end - stats.first).coerceIn(0L, sevenDays).toDouble()
+                    val recencyScore = 1.0 - age / sevenDays.toDouble()
+                    val usageScore = stats.second.toDouble() / maxForeground.toDouble()
+                    (recencyScore * 0.70) + (usageScore * 0.30)
+                }
+                .take(count)
+                .map { it.key }
+        } catch (e: Exception) {
+            Log.w(TAG, "Smart app suggestions unavailable", e)
+            emptyList()
+        }
     }
 
     // ── Helpers ───────────────────────────────────────────────────────────────
