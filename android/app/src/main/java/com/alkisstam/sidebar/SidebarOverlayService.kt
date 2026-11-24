@@ -758,7 +758,7 @@ class SidebarOverlayService : Service() {
         }
 
         val light = prefs.theme == "light"
-        val panelBg    = resolvePanelBg(prefs.panelColor, 248, light)
+        val panelBg    = resolvePanelBg(prefs.panelColor, (248 * prefs.panelOpacity).toInt().coerceIn(1, 255), light)
         val effectiveLight = if (prefs.panelColor.isNotEmpty()) {
             val hsv = FloatArray(3); Color.colorToHSV(panelBg, hsv); hsv[2] > 0.5f
         } else light
@@ -884,7 +884,7 @@ class SidebarOverlayService : Service() {
         }
 
         val light = prefs.theme == "light"
-        val panelBg    = resolvePanelBg(prefs.panelColor, 248, light)
+        val panelBg    = resolvePanelBg(prefs.panelColor, (248 * prefs.panelOpacity).toInt().coerceIn(1, 255), light)
         val effectiveLight = if (prefs.panelColor.isNotEmpty()) {
             val hsv = FloatArray(3); Color.colorToHSV(panelBg, hsv); hsv[2] > 0.5f
         } else light
@@ -2096,7 +2096,7 @@ class SidebarOverlayService : Service() {
         hideContextMenu()
         val prefs = pillPrefs()
         val light = prefs.theme == "light"
-        val panelBg = resolvePanelBg(prefs.panelColor, 252, light)
+        val panelBg = resolvePanelBg(prefs.panelColor, (252 * prefs.panelOpacity).toInt().coerceIn(1, 255), light)
         val effectiveLight = if (prefs.panelColor.isNotEmpty()) {
             val hsv = FloatArray(3); Color.colorToHSV(panelBg, hsv); hsv[2] > 0.5f
         } else light
