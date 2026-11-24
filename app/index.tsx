@@ -365,7 +365,44 @@ export default function Index() {
 
   return (
     <View style={s.root}>
-      <Stack.Screen options={{ title: "Pixel Sidebar" }} />
+      <Stack.Screen options={{ headerShown: false }} />
+
+      <View style={{
+        paddingTop: 14, paddingHorizontal: 20, paddingBottom: 12,
+        flexDirection: "row", alignItems: "center", justifyContent: "space-between",
+      }}>
+        <View style={{ flexDirection: "row", alignItems: "center", gap: 12 }}>
+          <View style={{
+            width: 44, height: 44, borderRadius: 16,
+            backgroundColor: colors.primaryContainer,
+            alignItems: "center", justifyContent: "center",
+          }}>
+            <Ionicons name="apps" size={23} color={colors.onPrimaryContainer} />
+          </View>
+          <View>
+            <Text style={{ color: colors.text, fontSize: 21, fontWeight: "700", letterSpacing: -0.45 }}>
+              Smart Sidebar
+            </Text>
+            <Text style={{ color: colors.subtext, fontSize: 12, marginTop: 2 }}>
+              Your edge workspace
+            </Text>
+          </View>
+        </View>
+        <View style={{
+          flexDirection: "row", alignItems: "center", gap: 7,
+          paddingHorizontal: 11, paddingVertical: 8, borderRadius: 18,
+          backgroundColor: serviceEnabled ? colors.primaryContainer : colors.surfaceContainerHigh,
+        }}>
+          <View style={{
+            width: 7, height: 7, borderRadius: 4,
+            backgroundColor: serviceEnabled ? colors.primary : colors.outline,
+          }} />
+          <Text style={{
+            color: serviceEnabled ? colors.onPrimaryContainer : colors.subtext,
+            fontSize: 11, fontWeight: "600",
+          }}>{serviceEnabled ? "RUNNING" : "PAUSED"}</Text>
+        </View>
+      </View>
 
       {permissionGranted === false && (
         <View style={s.banner}>
