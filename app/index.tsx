@@ -434,7 +434,49 @@ export default function Index() {
         {/* Handle tab */}
         <View style={{ display: activeTab === "handle" ? "flex" : "none", flex: 1 }}>
           <ScrollView style={s.scroll} contentContainerStyle={s.scrollContent}>
+            <View style={s.handlePreviewCard}>
+              <View style={s.handlePreviewHeader}>
+                <View style={{ flex: 1 }}>
+                  <Text style={s.handlePreviewTitle}>Live preview</Text>
+                  <Text style={s.handlePreviewSub}>Updates as you customize the handle</Text>
+                </View>
+                <View style={s.handlePreviewChip}>
+                  <Text style={s.handlePreviewChipText}>{pill.side.toUpperCase()}</Text>
+                </View>
+              </View>
+              <View style={s.handlePreviewStage}>
+                <View style={s.handlePreviewScreen}>
+                  <View style={[s.handlePreviewWallpaper, { backgroundColor: colors.primaryContainer }]} />
+                  <View style={[s.handlePreviewWallpaperSmall, { backgroundColor: colors.tertiaryContainer }]} />
+                  {pill.side === "left" || pill.side === "both" ? (
+                    <View style={[
+                      s.handlePreviewRail,
+                      {
+                        left: 0, top: `${pill.position * 100}%`,
+                        width: Math.max(3, Math.min(18, pill.width)),
+                        height: Math.max(28, Math.min(74, pill.height * 0.42)),
+                        opacity: pill.opacity,
+                        backgroundColor: pill.panelColor || colors.primary,
+                      },
+                    ]} />
+                  ) : null}
+                  {pill.side === "right" || pill.side === "both" ? (
+                    <View style={[
+                      s.handlePreviewRail,
+                      {
+                        right: 0, top: `${pill.position * 100}%`,
+                        width: Math.max(3, Math.min(18, pill.width)),
+                        height: Math.max(28, Math.min(74, pill.height * 0.42)),
+                        opacity: pill.opacity,
+                        backgroundColor: pill.panelColor || colors.primary,
+                      },
+                    ]} />
+                  ) : null}
+                </View>
+              </View>
+            </View>
             <View style={s.section}>
+              <Text style={s.sectionTitle}>Placement & appearance</Text>
               <View style={s.settingRow}>
                 <Text style={s.settingLabel}>Side</Text>
                 <View style={s.segmented}>
@@ -560,6 +602,7 @@ export default function Index() {
                 </View>
               </View>
               <View style={s.separator} />
+              <Text style={s.sectionTitle}>Size & position</Text>
               <SliderRow label="Position" min={0} max={1} step={0.01}
                 value={pill.position} display={pill.position.toFixed(2)}
                 leftEdge="Top" rightEdge="Bot"
@@ -576,6 +619,7 @@ export default function Index() {
                 onChange={v => setPill(p => ({ ...p, width: Math.round(v) }))}
                 colors={colors} s={s} />
               <View style={s.separator} />
+              <Text style={s.sectionTitle}>Transparency</Text>
               <SliderRow label="Handle opacity" min={0.1} max={1} step={0.05}
                 value={pill.opacity} display={`${Math.round(pill.opacity * 100)}%`}
                 onChange={v => setPill(p => ({ ...p, opacity: parseFloat(v.toFixed(2)) }))}
