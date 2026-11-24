@@ -224,7 +224,7 @@ class SidebarOverlayService : Service() {
 
     data class PillPrefs(
         val height: Int, val width: Int, val position: Float,
-        val side: String, val opacity: Float, val theme: String,
+        val side: String, val opacity: Float, val panelOpacity: Float, val theme: String,
         val panelColor: String
     )
 
@@ -273,6 +273,7 @@ class SidebarOverlayService : Service() {
             p.getFloat(Prefs.PILL_POSITION, 0.5f),
             p.getString(Prefs.PILL_SIDE, "right") ?: "right",
             p.getFloat(Prefs.PILL_OPACITY, 1.0f),
+            p.getFloat(Prefs.PANEL_OPACITY, 0.94f),
             theme,
             p.getString(Prefs.PANEL_COLOR, "") ?: ""
         )
@@ -559,7 +560,7 @@ class SidebarOverlayService : Service() {
         ))
         dismissOverlay = overlay
 
-        val panelBg = resolvePanelBg(prefs.panelColor, 248, light)
+        val panelBg = resolvePanelBg(prefs.panelColor, (248 * prefs.panelOpacity).toInt().coerceIn(1, 255), light)
         val effectiveLight = if (prefs.panelColor.isNotEmpty()) {
             val hsv = FloatArray(3); Color.colorToHSV(panelBg, hsv); hsv[2] > 0.5f
         } else light
@@ -634,12 +635,12 @@ class SidebarOverlayService : Service() {
         fun loadCell(pkg: String): View? {
             val cached = appIconCache[pkg]
             val cell = if (cached != null) {
-                makeAppCell(pkg, cached.first, cached.second, labelColor, false)
+                makeAppCell(pkg, cached.first, cached.second, labelColor, oPrefs.showLabels)
             } else {
                 try {
                     val info = pm.getApplicationInfo(pkg, 0)
                     makeAppCell(pkg, pm.getApplicationLabel(info).toString(),
-                        pm.getApplicationIcon(pkg), labelColor, false)
+                        pm.getApplicationIcon(pkg), labelColor, oPrefs.showLabels)
                 } catch (e: Exception) { null }
             }
             return cell?.also { v ->
@@ -848,7 +849,12 @@ class SidebarOverlayService : Service() {
                     WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL or
                     WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN,
             PixelFormat.TRANSLUCENT
-        ).apply { gravity = panelGravity; x = dp(76); y = panelY.coerceIn(0, maxOf(0, screenHeight - dp(200))) })
+        ).apply {
+            gravity = panelGravity
+            // Keep the controls popup clear of the 104dp-wide app rail.
+            x = dp(104 + 16)
+            y = panelY.coerceIn(0, maxOf(0, screenHeight - dp(200)))
+        })
 
         controlsPanelView = ctrl
 
@@ -1063,13 +1069,14 @@ class SidebarOverlayService : Service() {
         val drawerW = (dm.widthPixels * 0.8).toInt()
         val drawerH = (dm.heightPixels * 0.72).toInt()
 
-        val panelBg    = resolvePanelBg(p.panelColor, 252, light)
+        val panelBg    = resolvePanelBg(p.panelColor, (252 * p.panelOpacity).toInt().coerceIn(1, 255), light)
         val effectiveLight = if (p.panelColor.isNotEmpty()) {
             val hsv = FloatArray(3); Color.colorToHSV(panelBg, hsv); hsv[2] > 0.5f
         } else light
         val tileBg     = if (effectiveLight) Color.argb(130, 115, 105, 130) else Color.argb(130, 55, 52, 62)
         val labelColor = if (effectiveLight) Color.argb(140, 28, 27, 31)    else Color.argb(140, 230, 225, 229)
-        val indClr     = if (effectiveLight) Color.argb(60, 0, 0, 0)        else Color.argb(80, 255, 255, 255)
+        val dynamicIndicator = panelAccentColor()
+        val indClr     = Color.argb(92, Color.red(dynamicIndicator), Color.green(dynamicIndicator), Color.blue(dynamicIndicator))
 
         val dismissView = View(this).apply {
             setBackgroundColor(Color.TRANSPARENT)
