@@ -795,7 +795,17 @@ export default function Index() {
               {/* Animated accordion body */}
               <Animated.View style={{ overflow: 'hidden', maxHeight: expandAnim.interpolate({ inputRange: [0, 1], outputRange: [0, 2000] }) }}>
                 <View style={s.separator} />
-                <Text style={s.sectionTitle}>Active Controls</Text>
+                <View style={s.controlSectionHeading}>
+                  <View style={{ flex: 1 }}>
+                    <Text style={s.sectionTitle}>Active Controls</Text>
+                    <Text style={s.controlHint}>Hold and drag to change their order.</Text>
+                  </View>
+                  <View style={s.controlCount}>
+                    <Text style={s.controlCountText}>
+                      {orderedTiles.filter(t => !!overlay[t.key as TileKey]).length}
+                    </Text>
+                  </View>
+                </View>
                 <DraggableFlatList
                   horizontal
                   data={orderedTiles.filter(t => overlay[t.key as TileKey])}
@@ -819,25 +829,52 @@ export default function Index() {
                   }}
                 />
                 <View style={s.separator} />
-                <Text style={s.sectionTitle}>All Controls</Text>
+                <View style={s.controlSectionHeading}>
+                  <View style={{ flex: 1 }}>
+                    <Text style={s.sectionTitle}>All Controls</Text>
+                    <Text style={s.controlHint}>Choose what appears in your sidebar.</Text>
+                  </View>
+                  <View style={s.controlCount}>
+                    <Text style={s.controlCountText}>
+                      {ALL_CONTROLS.filter(item => !!overlay[item.key as AllKey]).length}/{ALL_CONTROLS.length}
+                    </Text>
+                  </View>
+                </View>
                 <View style={s.controlGrid}>
                   {ALL_CONTROLS.map(item => {
                     const enabled = !!overlay[item.key as AllKey];
                     return (
                       <Pressable
                         key={item.key}
-                        style={s.controlGridCell}
-                        onPress={() => setOverlay(p => ({ ...p, [item.key]: !enabled }))}
+                        accessibilityRole="switch"
+                        accessibilityState={{ checked: enabled }}
+                        accessibilityLabel={item.label}
+                        style={[
+                          s.controlGridCell,
+                          enabled ? s.controlGridCellActive : s.controlGridCellInactive,
+                        ]}
+                        onPress={() => setOverlay(p => ({ ...p, [item.key]: !p[item.key as AllKey] }))}
                       >
-                        <View style={[s.controlIconCircle, !enabled && s.controlIconCircleOff]}>
-                          <Ionicons name={item.icon as any} size={22} color={enabled ? colors.onPrimaryContainer : colors.subtext} />
-                          {enabled && (
-                            <View style={s.checkBadge}>
-                              <Ionicons name="checkmark" size={9} color="#fff" />
-                            </View>
-                          )}
+                        <View style={[
+                          s.controlGridIcon,
+                          enabled ? s.controlGridIconActive : s.controlGridIconInactive,
+                        ]}>
+                          <Ionicons
+                            name={item.icon as any}
+                            size={21}
+                            color={enabled ? colors.onPrimaryContainer : colors.subtext}
+                          />
                         </View>
-                        <Text style={s.controlCellLabel} numberOfLines={1}>{item.label}</Text>
+                        <View style={s.controlGridText}>
+                          <Text style={s.controlGridLabel} numberOfLines={2}>{item.label}</Text>
+                          <Text style={s.controlGridState}>{enabled ? "Shown in sidebar" : "Hidden"}</Text>
+                        </View>
+                        <View style={[
+                          s.controlGridCheck,
+                          enabled ? s.controlGridCheckActive : s.controlGridCheckInactive,
+                        ]}>
+                          {enabled && <Ionicons name="checkmark" size={13} color={colors.onPrimary} />}
+                        </View>
                       </Pressable>
                     );
                   })}
