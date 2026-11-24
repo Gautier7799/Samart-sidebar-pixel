@@ -808,14 +808,9 @@ class SidebarOverlayService : Service() {
                     LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT
                 ).apply { if (idx > 0 || oPrefs.showBrightnessSlider) topMargin = dp(6) }
             }
+            // Add only real controls. Each tile already uses width=0 / weight=1,
+            // so partial rows expand evenly instead of reserving blank placeholder slots.
             chunk.forEach { row.addView(it) }
-            repeat(3 - chunk.size) {
-                row.addView(View(this).apply {
-                    layoutParams = LinearLayout.LayoutParams(0, dp(60), 1f).apply {
-                        marginStart = dp(3); marginEnd = dp(3)
-                    }
-                })
-            }
             ctrl.addView(row)
         }
 
