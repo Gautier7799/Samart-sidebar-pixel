@@ -64,6 +64,14 @@ export interface DynamicPalette {
   darkPrimary?: string; darkOnPrimary?: string; darkPrimaryContainer?: string;
   darkOnPrimaryContainer?: string; darkBackground?: string; darkSurface?: string;
   darkSurfaceHigh?: string; darkText?: string; darkSubtext?: string;
+  lightSecondaryContainer?: string; lightOnSecondaryContainer?: string;
+  darkSecondaryContainer?: string; darkOnSecondaryContainer?: string;
+  lightTertiaryContainer?: string; lightOnTertiaryContainer?: string;
+  darkTertiaryContainer?: string; darkOnTertiaryContainer?: string;
+  lightOutline?: string; darkOutline?: string;
+  lightSeparator?: string; darkSeparator?: string;
+  lightErrorContainer?: string; lightOnErrorContainer?: string;
+  darkErrorContainer?: string; darkOnErrorContainer?: string;
 }
 
 export default {
