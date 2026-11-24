@@ -178,9 +178,6 @@ export default function Index() {
   const [appsSaving, setAppsSaving] = useState(false);
   const appsTabMountedRef = useRef(false);
   const appsLoadedRef = useRef(false);
-  // Holds the saved package list until apps finish loading so we can seed listData.
-  const pendingFavsRef = useRef<string[]>([]);
-
   const appState = useRef<AppStateStatus>(AppState.currentState);
 
   // Initial data fetch — runs once on mount.
