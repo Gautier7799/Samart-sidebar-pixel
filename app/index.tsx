@@ -193,8 +193,7 @@ export default function Index() {
       Sidebar.hasDndPermission(),
       Sidebar.hasWriteSettingsPermission(),
       Sidebar.hasUsageAccessPermission(),
-      Sidebar.getFavorites(),
-    ]).then(([perm, svc, pillSettings, overlaySettings, dnd, write, usage, favs]) => {
+    ]).then(([perm, svc, pillSettings, overlaySettings, dnd, write, usage]) => {
       setPermissionGranted(perm);
       setServiceEnabled(svc);
       setPill(pillSettings);
@@ -207,7 +206,6 @@ export default function Index() {
       setDndPerm(dnd);
       setWritePerm(write);
       setUsagePerm(usage);
-      pendingFavsRef.current = favs;
     });
   }, []);
 
@@ -239,19 +237,23 @@ export default function Index() {
     if (activeTab === "apps" && !appsLoadedRef.current) {
       appsLoadedRef.current = true;
       setAppsLoading(true);
-      Sidebar.getInstalledApps()
-        .then(apps => {
+      // Fetch apps and saved favorites together to avoid a startup race when
+      // the Apps tab is opened before the initial settings request completes.
+      Promise.all([Sidebar.getInstalledApps(), Sidebar.getFavorites()])
+        .then(([apps, favorites]) => {
           setAllApps(apps);
-          // Seed the favorites list from saved packages now that we have app data.
           const map = new Map(apps.map(a => [a.packageName, a]));
           setListData(
-            pendingFavsRef.current.map(pkg => {
+            favorites.map(pkg => {
               const app = map.get(pkg);
               return { key: pkg, name: app?.name ?? pkg.split(".").pop() ?? pkg, icon: app?.icon ?? null };
             })
           );
         })
-        .catch(() => Alert.alert("Error", "Failed to load installed apps."))
+        .catch(() => {
+          appsLoadedRef.current = false;
+          Alert.alert("Error", "Failed to load apps and favorites. Reopen the Apps tab to retry.");
+        })
         .finally(() => setAppsLoading(false));
     }
   }, [activeTab]);
@@ -1020,6 +1022,11 @@ export default function Index() {
                   extraData={favSet}
                   contentContainerStyle={s.appGrid}
                   showsVerticalScrollIndicator={false}
+                  ListEmptyComponent={
+                    <Text style={s.favEmpty}>
+                      {query ? "No apps match your search." : "No launchable apps found."}
+                    </Text>
+                  }
                 />
               )}
             </View>
