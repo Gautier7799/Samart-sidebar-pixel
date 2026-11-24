@@ -636,6 +636,7 @@ export default function Index() {
         <View style={{ display: activeTab === "behavior" ? "flex" : "none", flex: 1 }}>
           <ScrollView style={s.scroll} contentContainerStyle={s.scrollContent}>
             <View style={s.section}>
+              <Text style={s.sectionTitle}>DISPLAY</Text>
               <View style={s.row}>
                 <View style={{ flex: 1 }}>
                   <Text style={s.rowLabel}>Auto-hide in fullscreen</Text>
@@ -656,6 +657,7 @@ export default function Index() {
                   trackColor={{ true: colors.tint }}
                 />
               </View>
+              <Text style={s.sectionTitle}>APP BEHAVIOR</Text>
               <View style={s.separator} />
               <View style={s.row}>
                 <View style={{ flex: 1 }}>
@@ -728,6 +730,7 @@ export default function Index() {
                   </View>
                 </>
               )}
+              <Text style={s.sectionTitle}>INTERACTION & GESTURES</Text>
               <View style={s.separator} />
               <View style={s.row}>
                 <Text style={[s.rowLabel, { flex: 1 }]}>Vibration feedback</Text>
