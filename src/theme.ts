@@ -50,6 +50,45 @@ export function makeStyles(colors: AppColors) {
     scrollContent: { padding: 16, paddingBottom: 32 },
 
     section: { backgroundColor: colors.surfaceContainer, borderRadius: 24, overflow: "hidden" },
+    handlePreviewCard: {
+      backgroundColor: colors.surfaceContainerHigh,
+      borderRadius: 26, padding: 16, marginBottom: 14,
+      borderWidth: StyleSheet.hairlineWidth, borderColor: colors.outline,
+    },
+    handlePreviewHeader: {
+      flexDirection: "row", alignItems: "center", marginBottom: 12,
+    },
+    handlePreviewTitle: { color: colors.text, fontSize: 15, fontWeight: "700" },
+    handlePreviewSub: { color: colors.subtext, fontSize: 11, marginTop: 3 },
+    handlePreviewChip: {
+      paddingHorizontal: 10, paddingVertical: 6, borderRadius: 14,
+      backgroundColor: colors.secondaryContainer,
+    },
+    handlePreviewChipText: {
+      color: colors.onSecondaryContainer, fontSize: 10, fontWeight: "700",
+      letterSpacing: 0.5,
+    },
+    handlePreviewStage: {
+      height: 104, borderRadius: 18, overflow: "hidden",
+      backgroundColor: colors.surfaceContainer, padding: 8,
+    },
+    handlePreviewScreen: {
+      flex: 1, borderRadius: 13, overflow: "hidden",
+      backgroundColor: colors.bg, position: "relative",
+      borderWidth: StyleSheet.hairlineWidth, borderColor: colors.outline,
+    },
+    handlePreviewWallpaper: {
+      position: "absolute", width: "58%", height: "72%",
+      top: "14%", left: "21%", borderRadius: 16, opacity: 0.7,
+    },
+    handlePreviewWallpaperSmall: {
+      position: "absolute", width: "28%", height: "32%",
+      bottom: "10%", left: "36%", borderRadius: 10, opacity: 0.65,
+    },
+    handlePreviewRail: {
+      position: "absolute", borderRadius: 12,
+      transform: [{ translateY: -18 }],
+    },
     sectionTitle: {
       fontSize: 12, fontWeight: "700", color: colors.primary,
       marginHorizontal: 22, marginTop: 20, marginBottom: 8, letterSpacing: 0.8,
