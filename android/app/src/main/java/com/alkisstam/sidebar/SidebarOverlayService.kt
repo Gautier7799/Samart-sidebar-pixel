@@ -718,7 +718,7 @@ class SidebarOverlayService : Service() {
         val panelGravity = if (effectiveSide == "left") Gravity.START or Gravity.TOP
                            else Gravity.END or Gravity.TOP
         wm.addView(root, WindowManager.LayoutParams(
-            dp(104), panelHeight,
+            dp(90), panelHeight,
             overlayType(),
             WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or
                     WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL or
@@ -730,7 +730,7 @@ class SidebarOverlayService : Service() {
         handleView?.visibility = View.INVISIBLE
         handleViewAlt?.visibility = View.INVISIBLE
 
-        val slideFrom = if (effectiveSide == "left") -dp(104).toFloat() else dp(104).toFloat()
+        val slideFrom = if (effectiveSide == "left") -dp(90).toFloat() else dp(90).toFloat()
         root.translationX = slideFrom
         root.alpha = 0f
         root.scaleX = 0.92f
@@ -851,8 +851,8 @@ class SidebarOverlayService : Service() {
             PixelFormat.TRANSLUCENT
         ).apply {
             gravity = panelGravity
-            // Keep the controls popup clear of the 104dp-wide app rail.
-            x = dp(104 + 16)
+            // Keep the controls popup clear of the 90dp-wide app rail.
+            x = dp(90 + 16)
             y = panelY.coerceIn(0, maxOf(0, screenHeight - dp(200)))
         })
 
