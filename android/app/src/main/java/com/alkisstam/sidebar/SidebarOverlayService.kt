@@ -539,7 +539,9 @@ class SidebarOverlayService : Service() {
         val maxPanelHeight = dp(520)
         val recents = if (oPrefs.showRecentApps) cachedRecentApps.take(4) else emptyList()
         val totalAppCount = recents.size + pkgs.size
-        val appH = if (totalAppCount == 0) dp(68) else totalAppCount * dp(72)
+        val sectionHeaders = (if (recents.isNotEmpty()) dp(22) else 0) +
+            (if (recents.isNotEmpty() && pkgs.isNotEmpty()) dp(22) else 0)
+        val appH = if (totalAppCount == 0) dp(68) else totalAppCount * dp(72) + sectionHeaders
         val panelHeight = (dp(68) + appH).coerceAtMost(maxPanelHeight).coerceAtMost(screenHeight)
         val handleCenterY = (prefs.position * screenHeight).toInt()
         val panelY = (handleCenterY - panelHeight / 2).coerceIn(0, maxOf(0, screenHeight - panelHeight))
@@ -641,6 +643,19 @@ class SidebarOverlayService : Service() {
             }
         }
 
+        if (recents.isNotEmpty()) {
+            container.addView(TextView(this).apply {
+                text = "Suggested for you"
+                textSize = 10f
+                setTypeface(android.graphics.Typeface.create("sans-serif-medium", android.graphics.Typeface.NORMAL))
+                setTextColor(emptyColor)
+                gravity = Gravity.CENTER_VERTICAL
+                setPadding(dp(7), 0, dp(7), dp(5))
+                layoutParams = LinearLayout.LayoutParams(
+                    LinearLayout.LayoutParams.MATCH_PARENT, dp(22))
+            })
+        }
+
         for (pkg in recents) {
             loadCell(pkg)?.let { cell ->
                 cell.layoutParams = LinearLayout.LayoutParams(
@@ -649,6 +664,16 @@ class SidebarOverlayService : Service() {
             }
         }
         if (recents.isNotEmpty() && pkgs.isNotEmpty()) {
+            container.addView(TextView(this).apply {
+                text = "Favorites"
+                textSize = 10f
+                setTypeface(android.graphics.Typeface.create("sans-serif-medium", android.graphics.Typeface.NORMAL))
+                setTextColor(emptyColor)
+                gravity = Gravity.CENTER_VERTICAL
+                setPadding(dp(7), dp(2), dp(7), dp(3))
+                layoutParams = LinearLayout.LayoutParams(
+                    LinearLayout.LayoutParams.MATCH_PARENT, dp(22))
+            })
             container.addView(View(this).apply {
                 setBackgroundColor(Color.argb(40, 128, 128, 128))
                 layoutParams = LinearLayout.LayoutParams(
