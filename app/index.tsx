@@ -40,7 +40,7 @@ const TABS: { id: Tab; label: string; icon: string }[] = [
 ];
 
 const DEFAULT_PILL: PillSettings = {
-  height: 80, width: 10, position: 0.5, side: "right", opacity: 0.5, theme: "dark", themeChoice: "system", panelColor: "",
+  height: 80, width: 10, position: 0.5, side: "right", opacity: 0.5, panelOpacity: 0.94, theme: "dark", themeChoice: "system", panelColor: "",
 };
 
 const PANEL_COLORS: { key: string }[] = [
@@ -576,9 +576,14 @@ export default function Index() {
                 onChange={v => setPill(p => ({ ...p, width: Math.round(v) }))}
                 colors={colors} s={s} />
               <View style={s.separator} />
-              <SliderRow label="Opacity" min={0} max={1} step={0.05}
-                value={pill.opacity} display={pill.opacity.toFixed(2)}
+              <SliderRow label="Handle opacity" min={0.1} max={1} step={0.05}
+                value={pill.opacity} display={`${Math.round(pill.opacity * 100)}%`}
                 onChange={v => setPill(p => ({ ...p, opacity: parseFloat(v.toFixed(2)) }))}
+                colors={colors} s={s} />
+              <View style={s.separator} />
+              <SliderRow label="Panel transparency" min={0.35} max={1} step={0.05}
+                value={pill.panelOpacity} display={`${Math.round(pill.panelOpacity * 100)}%`}
+                onChange={v => setPill(p => ({ ...p, panelOpacity: parseFloat(v.toFixed(2)) }))}
                 colors={colors} s={s} />
             </View>
           </ScrollView>
