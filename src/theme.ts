@@ -56,11 +56,28 @@ export function makeStyles(colors: AppColors) {
     },
     separator: { height: StyleSheet.hairlineWidth, backgroundColor: colors.separator, marginLeft: 72 },
 
-    controlStrip: { paddingHorizontal: 12, paddingVertical: 12, gap: 16 },
-    controlCell: { alignItems: "center", width: 64 },
-    controlCellActive: { opacity: 0.8 },
+    controlSectionHeading: {
+      flexDirection: "row", alignItems: "center",
+      paddingTop: 8, paddingBottom: 4,
+    },
+    controlHint: {
+      color: colors.subtext, fontSize: 12, lineHeight: 17,
+      marginHorizontal: 22, marginTop: -3, marginBottom: 8,
+    },
+    controlCount: {
+      minWidth: 34, height: 28, paddingHorizontal: 9,
+      borderRadius: 14, backgroundColor: colors.secondaryContainer,
+      alignItems: "center", justifyContent: "center", marginRight: 18,
+    },
+    controlCountText: {
+      color: colors.onSecondaryContainer, fontSize: 12, fontWeight: "700",
+      fontVariant: ["tabular-nums"],
+    },
+    controlStrip: { paddingHorizontal: 16, paddingVertical: 14, gap: 14 },
+    controlCell: { alignItems: "center", width: 72 },
+    controlCellActive: { opacity: 0.86 },
     controlIconCircle: {
-      width: 52, height: 52, borderRadius: 26,
+      width: 48, height: 48, borderRadius: 18,
       backgroundColor: colors.primaryContainer,
       alignItems: "center", justifyContent: "center",
       position: "relative",
@@ -68,13 +85,45 @@ export function makeStyles(colors: AppColors) {
     controlIconCircleOff: { backgroundColor: colors.surfaceContainerHigh },
     controlCellLabel: {
       fontSize: 11, color: colors.text, textAlign: "center",
-      marginTop: 6, lineHeight: 14,
+      marginTop: 7, lineHeight: 14,
     },
     controlGrid: {
       flexDirection: "row", flexWrap: "wrap",
-      paddingHorizontal: 12, paddingVertical: 12, paddingTop: 4,
+      paddingHorizontal: 12, paddingVertical: 12, paddingTop: 4, gap: 8,
     },
-    controlGridCell: { width: "25%", alignItems: "center", paddingVertical: 10 },
+    controlGridCell: {
+      width: "48%", minHeight: 76, borderRadius: 20,
+      paddingHorizontal: 10, paddingVertical: 10,
+      flexDirection: "row", alignItems: "center", gap: 9,
+      borderWidth: StyleSheet.hairlineWidth,
+    },
+    controlGridCellActive: {
+      backgroundColor: colors.surfaceContainerHigh,
+      borderColor: colors.outline,
+    },
+    controlGridCellInactive: {
+      backgroundColor: colors.surfaceContainer,
+      borderColor: colors.separator,
+    },
+    controlGridIcon: {
+      width: 40, height: 40, borderRadius: 15,
+      alignItems: "center", justifyContent: "center",
+    },
+    controlGridIconActive: { backgroundColor: colors.primaryContainer },
+    controlGridIconInactive: { backgroundColor: colors.surfaceContainerHigh },
+    controlGridText: { flex: 1, minWidth: 0, justifyContent: "center" },
+    controlGridLabel: {
+      color: colors.text, fontSize: 12, lineHeight: 16, fontWeight: "600",
+    },
+    controlGridState: {
+      color: colors.subtext, fontSize: 10, lineHeight: 14, marginTop: 3,
+    },
+    controlGridCheck: {
+      width: 20, height: 20, borderRadius: 10,
+      alignItems: "center", justifyContent: "center",
+    },
+    controlGridCheckActive: { backgroundColor: colors.primary },
+    controlGridCheckInactive: { backgroundColor: colors.surfaceContainerHigh },
 
     row: {
       flexDirection: "row", alignItems: "center",
