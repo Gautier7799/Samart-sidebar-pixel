@@ -5,6 +5,8 @@ on:
     branches:
       - design/material-you-pixel
       - feature/material-you-floating-sidebar
+      - feature/sidebar-oem-additions-material-you
+      - main
     paths:
       - "app/**"
       - "src/**"
