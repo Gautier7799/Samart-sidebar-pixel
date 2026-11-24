@@ -91,6 +91,8 @@ class SidebarModule(private val reactContext: ReactApplicationContext) :
                     addCategory(Intent.CATEGORY_LAUNCHER)
                 }
                 val apps = pm.queryIntentActivities(intent, PackageManager.GET_META_DATA)
+                    // Some apps expose multiple launcher activities; show each package only once.
+                    .distinctBy { it.activityInfo.packageName }
                     .sortedBy { it.loadLabel(pm).toString().lowercase() }
 
                 val result = WritableNativeArray()
