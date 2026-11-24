@@ -574,8 +574,8 @@ export default function Index() {
               <View style={s.separator} />
               <View style={s.row}>
                 <View style={{ flex: 1 }}>
-                  <Text style={s.rowLabel}>Recent apps</Text>
-                  <Text style={s.rowSub}>Show 4 most recently used apps at the top of the panel (requires Usage Access)</Text>
+                  <Text style={s.rowLabel}>Smart app suggestions</Text>
+                  <Text style={s.rowSub}>Suggest up to 4 apps using recent activity and weekly usage. Favorites are excluded (requires Usage Access).</Text>
                 </View>
                 <Switch
                   value={overlay.showRecentApps}
