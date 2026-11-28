@@ -12,15 +12,17 @@ export function makeColors(scheme: 'light' | 'dark', palette: DynamicPalette = {
     onPrimary: dark ? (palette.darkOnPrimary ?? "#381E72") : (palette.lightOnPrimary ?? "#FFFFFF"),
     primaryContainer: dark ? (palette.darkPrimaryContainer ?? "#4F378B") : (palette.lightPrimaryContainer ?? "#EADDFF"),
     onPrimaryContainer: dark ? (palette.darkOnPrimaryContainer ?? "#EADDFF") : (palette.lightOnPrimaryContainer ?? "#21005D"),
-    secondaryContainer: dark ? "#4A4458" : "#E8DEF8",
-    onSecondaryContainer: dark ? "#E8DEF8" : "#1D192B",
+    secondaryContainer: dark ? (palette.darkSecondaryContainer ?? "#4A4458") : (palette.lightSecondaryContainer ?? "#E8DEF8"),
+    onSecondaryContainer: dark ? (palette.darkOnSecondaryContainer ?? "#E8DEF8") : (palette.lightOnSecondaryContainer ?? "#1D192B"),
+    tertiaryContainer: dark ? (palette.darkTertiaryContainer ?? "#633B48") : (palette.lightTertiaryContainer ?? "#FFD8E4"),
+    onTertiaryContainer: dark ? (palette.darkOnTertiaryContainer ?? "#FFD8E4") : (palette.lightOnTertiaryContainer ?? "#31111D"),
     text: dark ? (palette.darkText ?? "#E6E1E5") : (palette.lightText ?? "#1C1B1F"),
     subtext: dark ? (palette.darkSubtext ?? "#CAC4D0") : (palette.lightSubtext ?? "#49454F"),
-    outline: dark ? "#938F99" : "#79747E",
-    separator: dark ? "#49454F" : "#CAC4D0",
-    tint: dark ? "#D0BCFF" : "#6750A4",
-    errorContainer: dark ? "#8C1D18" : "#F9DEDC",
-    onErrorContainer: dark ? "#F2B8B5" : "#410E0B",
+    outline: dark ? (palette.darkOutline ?? "#938F99") : (palette.lightOutline ?? "#79747E"),
+    separator: dark ? (palette.darkSeparator ?? "#49454F") : (palette.lightSeparator ?? "#CAC4D0"),
+    tint: dark ? (palette.darkPrimary ?? "#D0BCFF") : (palette.lightPrimary ?? "#6750A4"),
+    errorContainer: dark ? (palette.darkErrorContainer ?? "#8C1D18") : (palette.lightErrorContainer ?? "#F9DEDC"),
+    onErrorContainer: dark ? (palette.darkOnErrorContainer ?? "#F2B8B5") : (palette.lightOnErrorContainer ?? "#410E0B"),
   };
 }
 
@@ -34,10 +36,13 @@ export function makeStyles(colors: AppColors) {
       flexDirection: "row",
       alignItems: "center",
       backgroundColor: colors.surfaceContainerHigh,
-      borderRadius: 26,
-      paddingHorizontal: 22,
-      paddingVertical: 20,
-      margin: 16,
+      borderColor: colors.outline,
+      borderWidth: StyleSheet.hairlineWidth,
+      borderRadius: 28,
+      paddingHorizontal: 20,
+      paddingVertical: 18,
+      marginHorizontal: 16,
+      marginTop: 4,
       marginBottom: 8,
     },
 
@@ -45,17 +50,73 @@ export function makeStyles(colors: AppColors) {
     scrollContent: { padding: 16, paddingBottom: 32 },
 
     section: { backgroundColor: colors.surfaceContainer, borderRadius: 24, overflow: "hidden" },
+    handlePreviewCard: {
+      backgroundColor: colors.surfaceContainerHigh,
+      borderRadius: 26, padding: 16, marginBottom: 14,
+      borderWidth: StyleSheet.hairlineWidth, borderColor: colors.outline,
+    },
+    handlePreviewHeader: {
+      flexDirection: "row", alignItems: "center", marginBottom: 12,
+    },
+    handlePreviewTitle: { color: colors.text, fontSize: 15, fontWeight: "700" },
+    handlePreviewSub: { color: colors.subtext, fontSize: 11, marginTop: 3 },
+    handlePreviewChip: {
+      paddingHorizontal: 10, paddingVertical: 6, borderRadius: 14,
+      backgroundColor: colors.secondaryContainer,
+    },
+    handlePreviewChipText: {
+      color: colors.onSecondaryContainer, fontSize: 10, fontWeight: "700",
+      letterSpacing: 0.5,
+    },
+    handlePreviewStage: {
+      height: 104, borderRadius: 18, overflow: "hidden",
+      backgroundColor: colors.surfaceContainer, padding: 8,
+    },
+    handlePreviewScreen: {
+      flex: 1, borderRadius: 13, overflow: "hidden",
+      backgroundColor: colors.bg, position: "relative",
+      borderWidth: StyleSheet.hairlineWidth, borderColor: colors.outline,
+    },
+    handlePreviewWallpaper: {
+      position: "absolute", width: "58%", height: "72%",
+      top: "14%", left: "21%", borderRadius: 16, opacity: 0.7,
+    },
+    handlePreviewWallpaperSmall: {
+      position: "absolute", width: "28%", height: "32%",
+      bottom: "10%", left: "36%", borderRadius: 10, opacity: 0.65,
+    },
+    handlePreviewRail: {
+      position: "absolute", borderRadius: 12,
+      transform: [{ translateY: -18 }],
+    },
     sectionTitle: {
       fontSize: 12, fontWeight: "700", color: colors.primary,
       marginHorizontal: 22, marginTop: 20, marginBottom: 8, letterSpacing: 0.8,
     },
     separator: { height: StyleSheet.hairlineWidth, backgroundColor: colors.separator, marginLeft: 72 },
 
-    controlStrip: { paddingHorizontal: 12, paddingVertical: 12, gap: 16 },
-    controlCell: { alignItems: "center", width: 64 },
-    controlCellActive: { opacity: 0.8 },
+    controlSectionHeading: {
+      flexDirection: "row", alignItems: "center",
+      paddingTop: 8, paddingBottom: 4,
+    },
+    controlHint: {
+      color: colors.subtext, fontSize: 12, lineHeight: 17,
+      marginHorizontal: 22, marginTop: -3, marginBottom: 8,
+    },
+    controlCount: {
+      minWidth: 34, height: 28, paddingHorizontal: 9,
+      borderRadius: 14, backgroundColor: colors.secondaryContainer,
+      alignItems: "center", justifyContent: "center", marginRight: 18,
+    },
+    controlCountText: {
+      color: colors.onSecondaryContainer, fontSize: 12, fontWeight: "700",
+      fontVariant: ["tabular-nums"],
+    },
+    controlStrip: { paddingHorizontal: 16, paddingVertical: 14, gap: 14 },
+    controlCell: { alignItems: "center", width: 72 },
+    controlCellActive: { opacity: 0.86 },
     controlIconCircle: {
-      width: 52, height: 52, borderRadius: 26,
+      width: 48, height: 48, borderRadius: 18,
       backgroundColor: colors.primaryContainer,
       alignItems: "center", justifyContent: "center",
       position: "relative",
@@ -63,13 +124,45 @@ export function makeStyles(colors: AppColors) {
     controlIconCircleOff: { backgroundColor: colors.surfaceContainerHigh },
     controlCellLabel: {
       fontSize: 11, color: colors.text, textAlign: "center",
-      marginTop: 6, lineHeight: 14,
+      marginTop: 7, lineHeight: 14,
     },
     controlGrid: {
       flexDirection: "row", flexWrap: "wrap",
-      paddingHorizontal: 12, paddingVertical: 12, paddingTop: 4,
+      paddingHorizontal: 12, paddingVertical: 12, paddingTop: 4, gap: 8,
     },
-    controlGridCell: { width: "25%", alignItems: "center", paddingVertical: 10 },
+    controlGridCell: {
+      width: "48%", minHeight: 76, borderRadius: 20,
+      paddingHorizontal: 10, paddingVertical: 10,
+      flexDirection: "row", alignItems: "center", gap: 9,
+      borderWidth: StyleSheet.hairlineWidth,
+    },
+    controlGridCellActive: {
+      backgroundColor: colors.surfaceContainerHigh,
+      borderColor: colors.outline,
+    },
+    controlGridCellInactive: {
+      backgroundColor: colors.surfaceContainer,
+      borderColor: colors.separator,
+    },
+    controlGridIcon: {
+      width: 40, height: 40, borderRadius: 15,
+      alignItems: "center", justifyContent: "center",
+    },
+    controlGridIconActive: { backgroundColor: colors.primaryContainer },
+    controlGridIconInactive: { backgroundColor: colors.surfaceContainerHigh },
+    controlGridText: { flex: 1, minWidth: 0, justifyContent: "center" },
+    controlGridLabel: {
+      color: colors.text, fontSize: 12, lineHeight: 16, fontWeight: "600",
+    },
+    controlGridState: {
+      color: colors.subtext, fontSize: 10, lineHeight: 14, marginTop: 3,
+    },
+    controlGridCheck: {
+      width: 20, height: 20, borderRadius: 10,
+      alignItems: "center", justifyContent: "center",
+    },
+    controlGridCheckActive: { backgroundColor: colors.primary },
+    controlGridCheckInactive: { backgroundColor: colors.surfaceContainerHigh },
 
     row: {
       flexDirection: "row", alignItems: "center",
@@ -202,21 +295,22 @@ export function makeStyles(colors: AppColors) {
     tabBar: {
       flexDirection: "row",
       backgroundColor: colors.surfaceContainer,
-      paddingBottom: 16,
-      paddingTop: 10,
+      paddingHorizontal: 8,
+      paddingBottom: 18,
+      paddingTop: 9,
       borderTopWidth: StyleSheet.hairlineWidth,
       borderTopColor: colors.separator,
     },
     tabItem: { flex: 1, alignItems: "center" },
     navIndicator: {
-      width: 76, height: 48, borderRadius: 24,
-      backgroundColor: 'transparent',
+      width: "100%", maxWidth: 84, height: 54, borderRadius: 20,
+      backgroundColor: "transparent",
       alignItems: "center", justifyContent: "center",
-      flexDirection: "column", gap: 2,
+      flexDirection: "column", gap: 3,
     },
-    navIndicatorActive: { backgroundColor: colors.primaryContainer, borderRadius: 24 },
-    tabLabel: { fontSize: 11, color: colors.subtext, letterSpacing: 0.4 },
-    tabLabelActive: { color: colors.onPrimaryContainer, fontWeight: "500" },
+    navIndicatorActive: { backgroundColor: colors.secondaryContainer, borderRadius: 20 },
+    tabLabel: { fontSize: 11, color: colors.subtext, letterSpacing: 0.15 },
+    tabLabelActive: { color: colors.onSecondaryContainer, fontWeight: "600" },
   });
 }
 

@@ -9,6 +9,7 @@ internal object Prefs {
     const val PILL_POSITION = "pill_position"
     const val PILL_SIDE = "pill_side"
     const val PILL_OPACITY = "pill_opacity"
+    const val PANEL_OPACITY = "panel_opacity"
     const val PILL_THEME = "pill_theme"
     const val THEME_CHOICE = "theme_choice"
     const val PANEL_COLOR = "panel_color"

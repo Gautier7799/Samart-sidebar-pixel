@@ -56,6 +56,24 @@ class SidebarModule(private val reactContext: ReactApplicationContext) :
                 result.putString("darkSurfaceHigh", hex(color("system_neutral1_700", 0xFF2B2930.toInt())))
                 result.putString("darkText", hex(color("system_neutral1_100", 0xFFE6E1E5.toInt())))
                 result.putString("darkSubtext", hex(color("system_neutral2_200", 0xFFCAC4D0.toInt())))
+
+                // Complete the Material You tonal roles used by the settings surfaces.
+                result.putString("lightSecondaryContainer", hex(color("system_accent2_100", 0xFFE8DEF8.toInt())))
+                result.putString("lightOnSecondaryContainer", hex(color("system_accent2_900", 0xFF1D192B.toInt())))
+                result.putString("darkSecondaryContainer", hex(color("system_accent2_800", 0xFF4A4458.toInt())))
+                result.putString("darkOnSecondaryContainer", hex(color("system_accent2_100", 0xFFE8DEF8.toInt())))
+                result.putString("lightTertiaryContainer", hex(color("system_accent3_100", 0xFFFFD8E4.toInt())))
+                result.putString("lightOnTertiaryContainer", hex(color("system_accent3_900", 0xFF31111D.toInt())))
+                result.putString("darkTertiaryContainer", hex(color("system_accent3_800", 0xFF633B48.toInt())))
+                result.putString("darkOnTertiaryContainer", hex(color("system_accent3_100", 0xFFFFD8E4.toInt())))
+                result.putString("lightOutline", hex(color("system_neutral2_500", 0xFF79747E.toInt())))
+                result.putString("darkOutline", hex(color("system_neutral2_400", 0xFF938F99.toInt())))
+                result.putString("lightSeparator", hex(color("system_neutral2_200", 0xFFCAC4D0.toInt())))
+                result.putString("darkSeparator", hex(color("system_neutral2_700", 0xFF49454F.toInt())))
+                result.putString("lightErrorContainer", hex(color("system_error_100", 0xFFF9DEDC.toInt())))
+                result.putString("lightOnErrorContainer", hex(color("system_error_900", 0xFF410E0B.toInt())))
+                result.putString("darkErrorContainer", hex(color("system_error_800", 0xFF8C1D18.toInt())))
+                result.putString("darkOnErrorContainer", hex(color("system_error_100", 0xFFF2B8B5.toInt())))
             }
             promise.resolve(result)
         } catch (e: Exception) {
@@ -73,6 +91,8 @@ class SidebarModule(private val reactContext: ReactApplicationContext) :
                     addCategory(Intent.CATEGORY_LAUNCHER)
                 }
                 val apps = pm.queryIntentActivities(intent, PackageManager.GET_META_DATA)
+                    // Some apps expose multiple launcher activities; show each package only once.
+                    .distinctBy { it.activityInfo.packageName }
                     .sortedBy { it.loadLabel(pm).toString().lowercase() }
 
                 val result = WritableNativeArray()
@@ -172,6 +192,7 @@ class SidebarModule(private val reactContext: ReactApplicationContext) :
         if (settings.hasKey("position")) prefs.putFloat(Prefs.PILL_POSITION, settings.getDouble("position").toFloat())
         if (settings.hasKey("side")) prefs.putString(Prefs.PILL_SIDE, settings.getString("side"))
         if (settings.hasKey("opacity")) prefs.putFloat(Prefs.PILL_OPACITY, settings.getDouble("opacity").toFloat())
+        if (settings.hasKey("panelOpacity")) prefs.putFloat(Prefs.PANEL_OPACITY, settings.getDouble("panelOpacity").toFloat())
         if (settings.hasKey("theme")) prefs.putString(Prefs.PILL_THEME, settings.getString("theme"))
         if (settings.hasKey("themeChoice")) prefs.putString(Prefs.THEME_CHOICE, settings.getString("themeChoice"))
         if (settings.hasKey("panelColor")) prefs.putString(Prefs.PANEL_COLOR, settings.getString("panelColor") ?: "")
@@ -198,6 +219,7 @@ class SidebarModule(private val reactContext: ReactApplicationContext) :
         map.putDouble("position", prefs.getFloat(Prefs.PILL_POSITION, 0.5f).toDouble())
         map.putString("side", prefs.getString(Prefs.PILL_SIDE, "right") ?: "right")
         map.putDouble("opacity", prefs.getFloat(Prefs.PILL_OPACITY, 1.0f).toDouble())
+        map.putDouble("panelOpacity", prefs.getFloat(Prefs.PANEL_OPACITY, 0.94f).toDouble())
         map.putString("theme", prefs.getString(Prefs.PILL_THEME, "dark") ?: "dark")
         val savedThemeChoice = prefs.getString(Prefs.THEME_CHOICE, null)
             ?: prefs.getString(Prefs.PILL_THEME, null) ?: "system"

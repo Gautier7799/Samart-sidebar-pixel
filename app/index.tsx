@@ -40,7 +40,7 @@ const TABS: { id: Tab; label: string; icon: string }[] = [
 ];
 
 const DEFAULT_PILL: PillSettings = {
-  height: 80, width: 10, position: 0.5, side: "right", opacity: 0.5, theme: "dark", themeChoice: "system", panelColor: "",
+  height: 80, width: 10, position: 0.5, side: "right", opacity: 0.5, panelOpacity: 0.94, theme: "dark", themeChoice: "system", panelColor: "",
 };
 
 const PANEL_COLORS: { key: string }[] = [
@@ -178,9 +178,6 @@ export default function Index() {
   const [appsSaving, setAppsSaving] = useState(false);
   const appsTabMountedRef = useRef(false);
   const appsLoadedRef = useRef(false);
-  // Holds the saved package list until apps finish loading so we can seed listData.
-  const pendingFavsRef = useRef<string[]>([]);
-
   const appState = useRef<AppStateStatus>(AppState.currentState);
 
   // Initial data fetch — runs once on mount.
@@ -193,8 +190,7 @@ export default function Index() {
       Sidebar.hasDndPermission(),
       Sidebar.hasWriteSettingsPermission(),
       Sidebar.hasUsageAccessPermission(),
-      Sidebar.getFavorites(),
-    ]).then(([perm, svc, pillSettings, overlaySettings, dnd, write, usage, favs]) => {
+    ]).then(([perm, svc, pillSettings, overlaySettings, dnd, write, usage]) => {
       setPermissionGranted(perm);
       setServiceEnabled(svc);
       setPill(pillSettings);
@@ -207,7 +203,6 @@ export default function Index() {
       setDndPerm(dnd);
       setWritePerm(write);
       setUsagePerm(usage);
-      pendingFavsRef.current = favs;
     });
   }, []);
 
@@ -239,19 +234,23 @@ export default function Index() {
     if (activeTab === "apps" && !appsLoadedRef.current) {
       appsLoadedRef.current = true;
       setAppsLoading(true);
-      Sidebar.getInstalledApps()
-        .then(apps => {
+      // Fetch apps and saved favorites together to avoid a startup race when
+      // the Apps tab is opened before the initial settings request completes.
+      Promise.all([Sidebar.getInstalledApps(), Sidebar.getFavorites()])
+        .then(([apps, favorites]) => {
           setAllApps(apps);
-          // Seed the favorites list from saved packages now that we have app data.
           const map = new Map(apps.map(a => [a.packageName, a]));
           setListData(
-            pendingFavsRef.current.map(pkg => {
+            favorites.map(pkg => {
               const app = map.get(pkg);
               return { key: pkg, name: app?.name ?? pkg.split(".").pop() ?? pkg, icon: app?.icon ?? null };
             })
           );
         })
-        .catch(() => Alert.alert("Error", "Failed to load installed apps."))
+        .catch(() => {
+          appsLoadedRef.current = false;
+          Alert.alert("Error", "Failed to load apps and favorites. Reopen the Apps tab to retry.");
+        })
         .finally(() => setAppsLoading(false));
     }
   }, [activeTab]);
@@ -365,7 +364,44 @@ export default function Index() {
 
   return (
     <View style={s.root}>
-      <Stack.Screen options={{ title: "Pixel Sidebar" }} />
+      <Stack.Screen options={{ headerShown: false }} />
+
+      <View style={{
+        paddingTop: 14, paddingHorizontal: 20, paddingBottom: 12,
+        flexDirection: "row", alignItems: "center", justifyContent: "space-between",
+      }}>
+        <View style={{ flexDirection: "row", alignItems: "center", gap: 12 }}>
+          <View style={{
+            width: 44, height: 44, borderRadius: 16,
+            backgroundColor: colors.primaryContainer,
+            alignItems: "center", justifyContent: "center",
+          }}>
+            <Ionicons name="apps" size={23} color={colors.onPrimaryContainer} />
+          </View>
+          <View>
+            <Text style={{ color: colors.text, fontSize: 21, fontWeight: "700", letterSpacing: -0.45 }}>
+              Smart Sidebar
+            </Text>
+            <Text style={{ color: colors.subtext, fontSize: 12, marginTop: 2 }}>
+              Your edge workspace
+            </Text>
+          </View>
+        </View>
+        <View style={{
+          flexDirection: "row", alignItems: "center", gap: 7,
+          paddingHorizontal: 11, paddingVertical: 8, borderRadius: 18,
+          backgroundColor: serviceEnabled ? colors.primaryContainer : colors.surfaceContainerHigh,
+        }}>
+          <View style={{
+            width: 7, height: 7, borderRadius: 4,
+            backgroundColor: serviceEnabled ? colors.primary : colors.outline,
+          }} />
+          <Text style={{
+            color: serviceEnabled ? colors.onPrimaryContainer : colors.subtext,
+            fontSize: 11, fontWeight: "600",
+          }}>{serviceEnabled ? "RUNNING" : "PAUSED"}</Text>
+        </View>
+      </View>
 
       {permissionGranted === false && (
         <View style={s.banner}>
@@ -397,7 +433,49 @@ export default function Index() {
         {/* Handle tab */}
         <View style={{ display: activeTab === "handle" ? "flex" : "none", flex: 1 }}>
           <ScrollView style={s.scroll} contentContainerStyle={s.scrollContent}>
+            <View style={s.handlePreviewCard}>
+              <View style={s.handlePreviewHeader}>
+                <View style={{ flex: 1 }}>
+                  <Text style={s.handlePreviewTitle}>Live preview</Text>
+                  <Text style={s.handlePreviewSub}>Updates as you customize the handle</Text>
+                </View>
+                <View style={s.handlePreviewChip}>
+                  <Text style={s.handlePreviewChipText}>{pill.side.toUpperCase()}</Text>
+                </View>
+              </View>
+              <View style={s.handlePreviewStage}>
+                <View style={s.handlePreviewScreen}>
+                  <View style={[s.handlePreviewWallpaper, { backgroundColor: colors.primaryContainer }]} />
+                  <View style={[s.handlePreviewWallpaperSmall, { backgroundColor: colors.tertiaryContainer }]} />
+                  {pill.side === "left" || pill.side === "both" ? (
+                    <View style={[
+                      s.handlePreviewRail,
+                      {
+                        left: 0, top: `${pill.position * 100}%`,
+                        width: Math.max(3, Math.min(18, pill.width)),
+                        height: Math.max(28, Math.min(74, pill.height * 0.42)),
+                        opacity: pill.opacity,
+                        backgroundColor: pill.panelColor || colors.primary,
+                      },
+                    ]} />
+                  ) : null}
+                  {pill.side === "right" || pill.side === "both" ? (
+                    <View style={[
+                      s.handlePreviewRail,
+                      {
+                        right: 0, top: `${pill.position * 100}%`,
+                        width: Math.max(3, Math.min(18, pill.width)),
+                        height: Math.max(28, Math.min(74, pill.height * 0.42)),
+                        opacity: pill.opacity,
+                        backgroundColor: pill.panelColor || colors.primary,
+                      },
+                    ]} />
+                  ) : null}
+                </View>
+              </View>
+            </View>
             <View style={s.section}>
+              <Text style={s.sectionTitle}>Placement & appearance</Text>
               <View style={s.settingRow}>
                 <Text style={s.settingLabel}>Side</Text>
                 <View style={s.segmented}>
@@ -523,6 +601,7 @@ export default function Index() {
                 </View>
               </View>
               <View style={s.separator} />
+              <Text style={s.sectionTitle}>Size & position</Text>
               <SliderRow label="Position" min={0} max={1} step={0.01}
                 value={pill.position} display={pill.position.toFixed(2)}
                 leftEdge="Top" rightEdge="Bot"
@@ -539,9 +618,15 @@ export default function Index() {
                 onChange={v => setPill(p => ({ ...p, width: Math.round(v) }))}
                 colors={colors} s={s} />
               <View style={s.separator} />
-              <SliderRow label="Opacity" min={0} max={1} step={0.05}
-                value={pill.opacity} display={pill.opacity.toFixed(2)}
+              <Text style={s.sectionTitle}>Transparency</Text>
+              <SliderRow label="Handle opacity" min={0.1} max={1} step={0.05}
+                value={pill.opacity} display={`${Math.round(pill.opacity * 100)}%`}
                 onChange={v => setPill(p => ({ ...p, opacity: parseFloat(v.toFixed(2)) }))}
+                colors={colors} s={s} />
+              <View style={s.separator} />
+              <SliderRow label="Panel transparency" min={0.35} max={1} step={0.05}
+                value={pill.panelOpacity} display={`${Math.round(pill.panelOpacity * 100)}%`}
+                onChange={v => setPill(p => ({ ...p, panelOpacity: parseFloat(v.toFixed(2)) }))}
                 colors={colors} s={s} />
             </View>
           </ScrollView>
@@ -551,6 +636,7 @@ export default function Index() {
         <View style={{ display: activeTab === "behavior" ? "flex" : "none", flex: 1 }}>
           <ScrollView style={s.scroll} contentContainerStyle={s.scrollContent}>
             <View style={s.section}>
+              <Text style={s.sectionTitle}>DISPLAY</Text>
               <View style={s.row}>
                 <View style={{ flex: 1 }}>
                   <Text style={s.rowLabel}>Auto-hide in fullscreen</Text>
@@ -571,11 +657,12 @@ export default function Index() {
                   trackColor={{ true: colors.tint }}
                 />
               </View>
+              <Text style={s.sectionTitle}>APP BEHAVIOR</Text>
               <View style={s.separator} />
               <View style={s.row}>
                 <View style={{ flex: 1 }}>
-                  <Text style={s.rowLabel}>Recent apps</Text>
-                  <Text style={s.rowSub}>Show 4 most recently used apps at the top of the panel (requires Usage Access)</Text>
+                  <Text style={s.rowLabel}>Smart app suggestions</Text>
+                  <Text style={s.rowSub}>Suggest up to 4 apps using recent activity and weekly usage. Favorites are excluded (requires Usage Access).</Text>
                 </View>
                 <Switch
                   value={overlay.showRecentApps}
@@ -643,6 +730,7 @@ export default function Index() {
                   </View>
                 </>
               )}
+              <Text style={s.sectionTitle}>INTERACTION & GESTURES</Text>
               <View style={s.separator} />
               <View style={s.row}>
                 <Text style={[s.rowLabel, { flex: 1 }]}>Vibration feedback</Text>
@@ -758,7 +846,17 @@ export default function Index() {
               {/* Animated accordion body */}
               <Animated.View style={{ overflow: 'hidden', maxHeight: expandAnim.interpolate({ inputRange: [0, 1], outputRange: [0, 2000] }) }}>
                 <View style={s.separator} />
-                <Text style={s.sectionTitle}>Active Controls</Text>
+                <View style={s.controlSectionHeading}>
+                  <View style={{ flex: 1 }}>
+                    <Text style={s.sectionTitle}>Active Controls</Text>
+                    <Text style={s.controlHint}>Hold and drag to change their order.</Text>
+                  </View>
+                  <View style={s.controlCount}>
+                    <Text style={s.controlCountText}>
+                      {orderedTiles.filter(t => !!overlay[t.key as TileKey]).length}
+                    </Text>
+                  </View>
+                </View>
                 <DraggableFlatList
                   horizontal
                   data={orderedTiles.filter(t => overlay[t.key as TileKey])}
@@ -782,25 +880,52 @@ export default function Index() {
                   }}
                 />
                 <View style={s.separator} />
-                <Text style={s.sectionTitle}>All Controls</Text>
+                <View style={s.controlSectionHeading}>
+                  <View style={{ flex: 1 }}>
+                    <Text style={s.sectionTitle}>All Controls</Text>
+                    <Text style={s.controlHint}>Choose what appears in your sidebar.</Text>
+                  </View>
+                  <View style={s.controlCount}>
+                    <Text style={s.controlCountText}>
+                      {ALL_CONTROLS.filter(item => !!overlay[item.key as AllKey]).length}/{ALL_CONTROLS.length}
+                    </Text>
+                  </View>
+                </View>
                 <View style={s.controlGrid}>
                   {ALL_CONTROLS.map(item => {
                     const enabled = !!overlay[item.key as AllKey];
                     return (
                       <Pressable
                         key={item.key}
-                        style={s.controlGridCell}
-                        onPress={() => setOverlay(p => ({ ...p, [item.key]: !enabled }))}
+                        accessibilityRole="switch"
+                        accessibilityState={{ checked: enabled }}
+                        accessibilityLabel={item.label}
+                        style={[
+                          s.controlGridCell,
+                          enabled ? s.controlGridCellActive : s.controlGridCellInactive,
+                        ]}
+                        onPress={() => setOverlay(p => ({ ...p, [item.key]: !p[item.key as AllKey] }))}
                       >
-                        <View style={[s.controlIconCircle, !enabled && s.controlIconCircleOff]}>
-                          <Ionicons name={item.icon as any} size={22} color={enabled ? colors.onPrimaryContainer : colors.subtext} />
-                          {enabled && (
-                            <View style={s.checkBadge}>
-                              <Ionicons name="checkmark" size={9} color="#fff" />
-                            </View>
-                          )}
+                        <View style={[
+                          s.controlGridIcon,
+                          enabled ? s.controlGridIconActive : s.controlGridIconInactive,
+                        ]}>
+                          <Ionicons
+                            name={item.icon as any}
+                            size={21}
+                            color={enabled ? colors.onPrimaryContainer : colors.subtext}
+                          />
                         </View>
-                        <Text style={s.controlCellLabel} numberOfLines={1}>{item.label}</Text>
+                        <View style={s.controlGridText}>
+                          <Text style={s.controlGridLabel} numberOfLines={2}>{item.label}</Text>
+                          <Text style={s.controlGridState}>{enabled ? "Shown in sidebar" : "Hidden"}</Text>
+                        </View>
+                        <View style={[
+                          s.controlGridCheck,
+                          enabled ? s.controlGridCheckActive : s.controlGridCheckInactive,
+                        ]}>
+                          {enabled && <Ionicons name="checkmark" size={13} color={colors.onPrimary} />}
+                        </View>
                       </Pressable>
                     );
                   })}
@@ -897,6 +1022,11 @@ export default function Index() {
                   extraData={favSet}
                   contentContainerStyle={s.appGrid}
                   showsVerticalScrollIndicator={false}
+                  ListEmptyComponent={
+                    <Text style={s.favEmpty}>
+                      {query ? "No apps match your search." : "No launchable apps found."}
+                    </Text>
+                  }
                 />
               )}
             </View>
